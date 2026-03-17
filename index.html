@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Laundry Productivity Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+      background: #f6f7f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    input, select {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #000;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: #000;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .result {
+      text-align: center;
+    }
+
+    .metric {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .status {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .on { color: #16a34a; }
+    .off { color: #dc2626; }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>Laundry Productivity Tracker</h2>
+
+  <form id="form">
+
+    <div class="card">
+      <h3>Staff</h3>
+      <select id="staff" required>
+        <option value="">Select Staff</option>
+        <option>Staff 1</option>
+        <option>Staff 2</option>
+        <option>Staff 3</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h3>Time Tracking</h3>
+      <div class="grid">
+        <input type="datetime-local" id="clockIn" required>
+        <input type="datetime-local" id="clockOut" required>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Bedding</h3>
+      <div class="grid">
+        <input type="number" placeholder="SPC" id="SPC">
+        <input type="number" placeholder="KPC" id="KPC">
+        <input type="number" placeholder="KFl" id="KFl">
+        <input type="number" placeholder="Kf" id="Kf">
+        <input type="number" placeholder="QFl" id="QFl">
+        <input type="number" placeholder="Qf" id="Qf">
+        <input type="number" placeholder="TFl" id="TFl">
+        <input type="number" placeholder="Tf" id="Tf">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Towels</h3>
+      <div class="grid">
+        <input type="number" placeholder="Bath (T)" id="T">
+        <input type="number" placeholder="Hand (HT)" id="HT">
+        <input type="number" placeholder="Pool (PT)" id="PT">
+        <input type="number" placeholder="Wash Cloth (WC)" id="WC">
+        <input type="number" placeholder="Bath Mat (BM)" id="BM">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Kitchen</h3>
+      <div class="grid">
+        <input type="number" placeholder="Kitchen Towel (KT)" id="KT">
+        <input type="number" placeholder="Kitchen Cloth (KWC)" id="KWC">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Cost</h3>
+      <input type="number" placeholder="Total Cost ($)" id="cost" required>
+    </div>
+
+    <button type="submit">Submit</button>
+
+  </form>
+
+  <div class="card result" id="result" style="display:none;"></div>
+
+</div>
+
+<script>
+const scriptURL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
+document.getElementById("form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const ids = [
+    "staff",
+    "SPC","KPC","KFl","Kf","QFl","Qf","TFl","Tf",
+    "T","HT","PT","WC","BM","KT","KWC",
+    "cost","clockIn","clockOut"
+  ];
+
+  let data = {};
+  ids.forEach(id => {
+    data[id] = document.getElementById(id).value || 0;
+  });
+
+  const res = await fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  const statusClass = result.status === "On Track" ? "on" : "off";
+
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result").innerHTML = `
+    <div class="metric">Total Weight: <strong>${result.totalWeight.toFixed(2)} lbs</strong></div>
+    <div class="metric">Hours Worked: <strong>${result.hoursWorked.toFixed(2)}</strong></div>
+    <div class="metric">Lbs / Hour: <strong>${result.lbsPerHour.toFixed(2)}</strong></div>
+    <div class="metric">Cost / lb: <strong>$${result.costPerLb.toFixed(2)}</strong></div>
+    <div class="status ${statusClass}">${result.status}</div>
+  `;
+});
+</script>
+
+</body>
+</html>
