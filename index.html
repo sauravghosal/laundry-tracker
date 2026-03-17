@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Laundry Productivity Tracker</title>
+  <title>Laundry Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -19,11 +19,18 @@
 
     h2 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .date {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 12px;
     }
 
     .card {
-      background: #fff;
+      background: white;
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 12px;
@@ -31,11 +38,10 @@
     }
 
     h3 {
-      margin: 0 0 10px 0;
-      font-size: 14px;
-      color: #666;
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: #777;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .grid {
@@ -54,11 +60,11 @@
     }
 
     input:focus, select:focus {
+      border-color: black;
       outline: none;
-      border-color: #000;
     }
 
-    .submit-wrapper {
+    .submit-wrap {
       position: sticky;
       bottom: 0;
       background: #f6f7f9;
@@ -78,27 +84,8 @@
 
     .result {
       text-align: center;
-    }
-
-    .metric {
-      margin: 6px 0;
-      font-size: 15px;
-    }
-
-    .status {
-      margin-top: 10px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .on { color: #16a34a; }
-    .off { color: #dc2626; }
-
-    .date-display {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 10px;
+      font-size: 16px;
+      padding: 10px;
     }
   </style>
 </head>
@@ -108,7 +95,7 @@
 <div class="container">
 
   <h2>Laundry Tracker</h2>
-  <div class="date-display" id="todayDate"></div>
+  <div class="date" id="todayDate"></div>
 
   <form id="form">
 
@@ -116,7 +103,7 @@
     <div class="card">
       <h3>Staff</h3>
       <select id="staff" required>
-        <option value="">Select Staff</option>
+        <option value="">Select</option>
         <option value="Daniel">Daniel</option>
         <option value="Shayla">Shayla</option>
       </select>
@@ -167,7 +154,7 @@
       </div>
     </div>
 
-    <div class="submit-wrapper">
+    <div class="submit-wrap">
       <button type="submit">Submit</button>
     </div>
 
@@ -180,12 +167,12 @@
 <script>
 const scriptURL = "https://script.google.com/a/macros/ghosallodging.com/s/AKfycbzhOsn5qlhs07CbQgkYrKUaAQ8-ll7u2pWKnRnS3hAuvtKV1sVeJi65LPIBqGqSN5mq/exec";
 
-// Auto set today's date
+// Set date
 const now = new Date();
 document.getElementById("todayDate").innerText =
   now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
-// Auto-fill clock in to now
+// Auto clock-in
 const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
   .toISOString().slice(0,16);
 
@@ -206,22 +193,18 @@ document.getElementById("form").addEventListener("submit", async function(e) {
     data[id] = document.getElementById(id).value || 0;
   });
 
-  const res = await fetch(scriptURL, {
+  await fetch(scriptURL, {
     method: "POST",
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    mode: "no-cors"
   });
-
-  const result = await res.json();
-
-  const statusClass = result.status === "On Track" ? "on" : "off";
 
   document.getElementById("result").style.display = "block";
   document.getElementById("result").innerHTML = `
-    <div class="metric">Total Weight: <strong>${result.totalWeight.toFixed(2)} lbs</strong></div>
-    <div class="metric">Hours: <strong>${result.hoursWorked.toFixed(2)}</strong></div>
-    <div class="metric">Lbs / Hour: <strong>${result.lbsPerHour.toFixed(2)}</strong></div>
-    <div class="status ${statusClass}">${result.status}</div>
+    Submitted successfully ✅
   `;
+
+  document.getElementById("form").reset();
 });
 </script>
 
