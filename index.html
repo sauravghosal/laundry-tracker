@@ -9,11 +9,11 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
       background: #f6f7f9;
       margin: 0;
-      padding: 16px;
+      padding: 20px 14px;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 640px;
       margin: auto;
     }
 
@@ -26,28 +26,40 @@
       text-align: center;
       color: #777;
       font-size: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .card {
       background: white;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 18px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
     h3 {
-      font-size: 12px;
-      color: #888;
+      font-size: 13px;
+      color: #666;
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
+      letter-spacing: 0.5px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 14px 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .label {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 4px;
     }
 
     input, select {
@@ -66,7 +78,7 @@
       background: black;
       color: white;
       font-size: 16px;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     .results {
@@ -78,8 +90,8 @@
 
     .metric {
       background: #f9fafb;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 14px;
+      border-radius: 12px;
     }
 
     .value {
@@ -87,9 +99,10 @@
       font-weight: 600;
     }
 
-    .label {
+    .metric-label {
       font-size: 12px;
       color: #777;
+      margin-top: 4px;
     }
 
     .status {
@@ -133,29 +146,44 @@
     <div class="card">
       <h3>Time</h3>
       <div class="grid">
-        <input type="datetime-local" id="clockIn" required>
-        <input type="datetime-local" id="clockOut" required>
+        <div class="input-group">
+          <div class="label">Clock In</div>
+          <input type="datetime-local" id="clockIn" required>
+        </div>
+        <div class="input-group">
+          <div class="label">Clock Out</div>
+          <input type="datetime-local" id="clockOut" required>
+        </div>
       </div>
     </div>
 
     <div class="card">
       <h3>Linen Counts</h3>
       <div class="grid">
-        <input type="number" id="SPC" placeholder="SPC">
-        <input type="number" id="KPC" placeholder="KPC">
-        <input type="number" id="KFl" placeholder="KFl">
-        <input type="number" id="Kf" placeholder="Kf">
-        <input type="number" id="QFl" placeholder="QFl">
-        <input type="number" id="Qf" placeholder="Qf">
-        <input type="number" id="TFl" placeholder="TFl">
-        <input type="number" id="Tf" placeholder="Tf">
-        <input type="number" id="T" placeholder="Bath Towel">
-        <input type="number" id="HT" placeholder="Hand Towel">
-        <input type="number" id="PT" placeholder="Pool Towel">
-        <input type="number" id="WC" placeholder="Wash Cloth">
-        <input type="number" id="BM" placeholder="Bath Mat">
-        <input type="number" id="KT" placeholder="Kitchen Towel">
-        <input type="number" id="KWC" placeholder="Kitchen Cloth">
+
+        <div class="input-group"><div class="label">Standard Pillowcase</div><input id="SPC" type="number"></div>
+        <div class="input-group"><div class="label">King Pillowcase</div><input id="KPC" type="number"></div>
+
+        <div class="input-group"><div class="label">King Flat</div><input id="KFl" type="number"></div>
+        <div class="input-group"><div class="label">King Fitted</div><input id="Kf" type="number"></div>
+
+        <div class="input-group"><div class="label">Queen Flat</div><input id="QFl" type="number"></div>
+        <div class="input-group"><div class="label">Queen Fitted</div><input id="Qf" type="number"></div>
+
+        <div class="input-group"><div class="label">Twin Flat</div><input id="TFl" type="number"></div>
+        <div class="input-group"><div class="label">Twin Fitted</div><input id="Tf" type="number"></div>
+
+        <div class="input-group"><div class="label">Bath Towel</div><input id="T" type="number"></div>
+        <div class="input-group"><div class="label">Hand Towel</div><input id="HT" type="number"></div>
+
+        <div class="input-group"><div class="label">Pool Towel</div><input id="PT" type="number"></div>
+        <div class="input-group"><div class="label">Wash Cloth</div><input id="WC" type="number"></div>
+
+        <div class="input-group"><div class="label">Bath Mat</div><input id="BM" type="number"></div>
+        <div class="input-group"><div class="label">Kitchen Towel</div><input id="KT" type="number"></div>
+
+        <div class="input-group"><div class="label">Kitchen Wash Cloth</div><input id="KWC" type="number"></div>
+
       </div>
     </div>
 
@@ -180,12 +208,10 @@ const weights = {
 const RATE = 17;
 const TARGET = 0.75;
 
-// Date
 const now = new Date();
 document.getElementById("todayDate").innerText =
   now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
-// Auto clock-in
 const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
   .toISOString().slice(0,16);
 document.getElementById("clockIn").value = localISOTime;
@@ -218,11 +244,11 @@ document.getElementById("form").addEventListener("submit", function(e) {
   resultsDiv.style.display = "grid";
 
   resultsDiv.innerHTML = `
-    <div class="metric"><div class="value">${totalWeight.toFixed(1)}</div><div class="label">Total lbs</div></div>
-    <div class="metric"><div class="value">${hours.toFixed(2)}</div><div class="label">Hours</div></div>
-    <div class="metric"><div class="value">$${cost.toFixed(2)}</div><div class="label">Cost</div></div>
-    <div class="metric"><div class="value">$${costPerLb.toFixed(2)}</div><div class="label">Cost / lb</div></div>
-    <div class="metric"><div class="value">${lbsPerHour.toFixed(1)}</div><div class="label">lbs / hr</div></div>
+    <div class="metric"><div class="value">${totalWeight.toFixed(1)}</div><div class="metric-label">Total lbs</div></div>
+    <div class="metric"><div class="value">${hours.toFixed(2)}</div><div class="metric-label">Hours</div></div>
+    <div class="metric"><div class="value">$${cost.toFixed(2)}</div><div class="metric-label">Cost</div></div>
+    <div class="metric"><div class="value">$${costPerLb.toFixed(2)}</div><div class="metric-label">Cost / lb</div></div>
+    <div class="metric"><div class="value">${lbsPerHour.toFixed(1)}</div><div class="metric-label">lbs / hr</div></div>
     <div class="status ${isOnTarget ? 'good' : 'bad'}">
       ${isOnTarget ? 'ON TARGET ✅' : 'OFF TARGET ❌'}
     </div>
