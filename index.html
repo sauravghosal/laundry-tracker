@@ -276,6 +276,19 @@
         </div>
 
         <div class="card">
+          <h3>Specialty Linen</h3>
+          <div class="input-group">
+            <div class="label">Total Weight (lbs)</div>
+            <input
+              id="specialLbs"
+              type="number"
+              step="0.1"
+              placeholder="e.g. 25"
+            />
+          </div>
+        </div>
+
+        <div class="card">
           <button type="submit">Calculate</button>
         </div>
       </form>
@@ -346,6 +359,11 @@
           const val = el ? Number(el.value) : 0;
           totalWeight += (val || 0) * weights[key];
         });
+
+        // Specialty linen (direct lbs)
+        const specialLbs = Number(document.getElementById("specialLbs")?.value || 0);
+
+        totalWeight += specialLbs;
 
         const clockInVal = document.getElementById("clockIn").value;
         const clockOutVal = document.getElementById("clockOut").value;
