@@ -19,35 +19,36 @@
 
     h2 {
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .date {
       text-align: center;
-      color: #666;
+      color: #777;
       font-size: 14px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .card {
       background: white;
       border-radius: 14px;
       padding: 16px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
     h3 {
-      margin: 0 0 10px;
-      font-size: 13px;
-      color: #777;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #888;
       text-transform: uppercase;
+      letter-spacing: .5px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 10px;
     }
 
     input, select {
@@ -58,19 +59,56 @@
       width: 100%;
     }
 
-    .result-box {
+    .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
       text-align: center;
+    }
+
+    .metric {
+      background: #f9fafb;
       padding: 12px;
-      font-size: 16px;
+      border-radius: 10px;
+    }
+
+    .metric .value {
+      font-size: 18px;
       font-weight: 600;
     }
 
+    .metric .label {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .status {
+      grid-column: span 2;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
     .good {
-      color: green;
+      background: #e6f7ec;
+      color: #0a7f42;
     }
 
     .bad {
-      color: red;
+      background: #fdecea;
+      color: #b42318;
     }
   </style>
 </head>
@@ -85,7 +123,7 @@
   <div class="card">
     <h3>Staff</h3>
     <select id="staff">
-      <option value="">Select</option>
+      <option value="">Select Staff</option>
       <option value="Daniel">Daniel</option>
       <option value="Shayla">Shayla</option>
     </select>
@@ -94,34 +132,63 @@
   <div class="card">
     <h3>Time</h3>
     <div class="grid">
-      <input type="datetime-local" id="clockIn">
-      <input type="datetime-local" id="clockOut">
+      <div class="input-group">
+        <div class="label">Clock In</div>
+        <input type="datetime-local" id="clockIn">
+      </div>
+      <div class="input-group">
+        <div class="label">Clock Out</div>
+        <input type="datetime-local" id="clockOut">
+      </div>
     </div>
   </div>
 
   <div class="card">
     <h3>Linen Counts</h3>
     <div class="grid">
-      <input type="number" placeholder="SPC" id="SPC">
-      <input type="number" placeholder="KPC" id="KPC">
-      <input type="number" placeholder="KFl" id="KFl">
-      <input type="number" placeholder="Kf" id="Kf">
-      <input type="number" placeholder="QFl" id="QFl">
-      <input type="number" placeholder="Qf" id="Qf">
-      <input type="number" placeholder="TFl" id="TFl">
-      <input type="number" placeholder="Tf" id="Tf">
-      <input type="number" placeholder="T" id="T">
-      <input type="number" placeholder="HT" id="HT">
-      <input type="number" placeholder="PT" id="PT">
-      <input type="number" placeholder="WC" id="WC">
-      <input type="number" placeholder="BM" id="BM">
-      <input type="number" placeholder="KT" id="KT">
-      <input type="number" placeholder="KWC" id="KWC">
+      <input type="number" placeholder="SPC">
+      <input type="number" placeholder="KPC">
+      <input type="number" placeholder="KFl">
+      <input type="number" placeholder="Kf">
+      <input type="number" placeholder="QFl">
+      <input type="number" placeholder="Qf">
+      <input type="number" placeholder="TFl">
+      <input type="number" placeholder="Tf">
+      <input type="number" placeholder="Bath Towel">
+      <input type="number" placeholder="Hand Towel">
+      <input type="number" placeholder="Pool Towel">
+      <input type="number" placeholder="Wash Cloth">
+      <input type="number" placeholder="Bath Mat">
+      <input type="number" placeholder="Kitchen Towel">
+      <input type="number" placeholder="Kitchen Cloth">
     </div>
   </div>
 
-  <div class="card result-box" id="results">
-    Enter data to see results
+  <div class="card">
+    <h3>Performance</h3>
+    <div class="results" id="results">
+      <div class="metric">
+        <div class="value">0</div>
+        <div class="label">Total lbs</div>
+      </div>
+      <div class="metric">
+        <div class="value">0</div>
+        <div class="label">Hours</div>
+      </div>
+      <div class="metric">
+        <div class="value">$0</div>
+        <div class="label">Cost</div>
+      </div>
+      <div class="metric">
+        <div class="value">$0</div>
+        <div class="label">Cost / lb</div>
+      </div>
+      <div class="metric">
+        <div class="value">0</div>
+        <div class="label">lbs / hr</div>
+      </div>
+      <div class="status">Enter data</div>
+    </div>
   </div>
 
 </div>
@@ -147,38 +214,42 @@ const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
   .toISOString().slice(0,16);
 document.getElementById("clockIn").value = localISOTime;
 
-// Listen for all inputs
 document.querySelectorAll("input, select").forEach(el => {
   el.addEventListener("input", calculate);
 });
 
 function calculate() {
-  let totalWeight = 0;
+  const inputs = document.querySelectorAll(".card:nth-child(4) input");
 
-  for (let key in weights) {
-    const val = Number(document.getElementById(key).value || 0);
-    totalWeight += val * weights[key];
-  }
+  const keys = Object.keys(weights);
+
+  let totalWeight = 0;
+  inputs.forEach((input, i) => {
+    const val = Number(input.value || 0);
+    totalWeight += val * weights[keys[i]];
+  });
 
   const clockIn = new Date(document.getElementById("clockIn").value);
   const clockOut = new Date(document.getElementById("clockOut").value);
 
   let hours = 0;
   if (clockIn && clockOut && clockOut > clockIn) {
-    hours = (clockOut - clockIn) / (1000 * 60 * 60);
+    hours = (clockOut - clockIn) / 3600000;
   }
 
   const cost = hours * RATE;
   const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
+  const lbsPerHour = hours > 0 ? totalWeight / hours : 0;
 
   const isOnTarget = costPerLb <= TARGET;
 
   document.getElementById("results").innerHTML = `
-    <div>Total Weight: <b>${totalWeight.toFixed(2)} lbs</b></div>
-    <div>Hours: <b>${hours.toFixed(2)}</b></div>
-    <div>Cost: <b>$${cost.toFixed(2)}</b></div>
-    <div>Cost / lb: <b>$${costPerLb.toFixed(2)}</b></div>
-    <div class="${isOnTarget ? 'good' : 'bad'}">
+    <div class="metric"><div class="value">${totalWeight.toFixed(1)}</div><div class="label">Total lbs</div></div>
+    <div class="metric"><div class="value">${hours.toFixed(2)}</div><div class="label">Hours</div></div>
+    <div class="metric"><div class="value">$${cost.toFixed(2)}</div><div class="label">Cost</div></div>
+    <div class="metric"><div class="value">$${costPerLb.toFixed(2)}</div><div class="label">Cost / lb</div></div>
+    <div class="metric"><div class="value">${lbsPerHour.toFixed(1)}</div><div class="label">lbs / hr</div></div>
+    <div class="status ${isOnTarget ? 'good' : 'bad'}">
       ${isOnTarget ? 'ON TARGET ✅' : 'OFF TARGET ❌'}
     </div>
   `;
