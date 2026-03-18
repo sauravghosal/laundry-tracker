@@ -1,260 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>Laundry Productivity Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <title>Laundry Productivity Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+        background: #f6f7f9;
+        margin: 0;
+        padding: 20px 16px;
+      }
 
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-      background: #f6f7f9;
-      margin: 0;
-      padding: 20px 14px;
-    }
+      .container {
+        max-width: 640px;
+        margin: auto;
+      }
 
-    .container {
-      max-width: 640px;
-      margin: auto;
-    }
+      h2 {
+        text-align: center;
+        margin-bottom: 6px;
+      }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 4px;
-    }
+      .date {
+        text-align: center;
+        color: #777;
+        font-size: 14px;
+        margin-bottom: 22px;
+      }
 
-    .date {
-      text-align: center;
-      color: #777;
-      font-size: 14px;
-      margin-bottom: 20px;
-    }
+      /* CARD */
+      .card {
+        background: white;
+        border-radius: 18px;
+        padding: 20px 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+      }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
+      /* SECTION HEADERS */
+      h3 {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        letter-spacing: 0.6px;
+      }
 
-    h3 {
-      font-size: 13px;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-      letter-spacing: 0.5px;
-    }
+      /* GRID */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 14px;
+      }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 12px;
-    }
+      /* MOBILE STACK */
+      @media (max-width: 640px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-    }
+      /* INPUT GROUP */
+      .input-group {
+        display: flex;
+        flex-direction: column;
+      }
 
-    .label {
-      font-size: 12px;
-      color: #555;
-      margin-bottom: 4px;
-    }
+      /* LABEL */
+      .label {
+        font-size: 13px;
+        color: #444;
+        margin-bottom: 6px;
+      }
 
-    input, select {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      width: 100%;
-    }
+      /* INPUT */
+      input,
+      select {
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-size: 16px;
+        width: 100%;
+        background: #fafafa;
+      }
 
-    button {
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      border: none;
-      background: black;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-    }
+      /* INPUT FOCUS */
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #000;
+        background: white;
+      }
 
-    .results {
-      display: none;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      text-align: center;
-    }
+      /* BUTTON */
+      button {
+        width: 100%;
+        padding: 18px;
+        border-radius: 14px;
+        border: none;
+        background: black;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+      }
 
-    .metric {
-      background: #f9fafb;
-      padding: 14px;
-      border-radius: 12px;
-    }
+      /* RESULTS */
+      .results {
+        display: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        text-align: center;
+      }
 
-    .value {
-      font-size: 18px;
-      font-weight: 600;
-    }
+      .metric {
+        background: #f9fafb;
+        padding: 16px;
+        border-radius: 14px;
+      }
 
-    .metric-label {
-      font-size: 12px;
-      color: #777;
-      margin-top: 4px;
-    }
+      .value {
+        font-size: 20px;
+        font-weight: 600;
+      }
 
-    .status {
-      grid-column: span 2;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 16px;
-    }
+      .metric-label {
+        font-size: 12px;
+        color: #777;
+        margin-top: 6px;
+      }
 
-    .good {
-      background: #e6f7ec;
-      color: #0a7f42;
-    }
+      /* STATUS */
+      .status {
+        grid-column: span 2;
+        padding: 16px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 16px;
+      }
 
-    .bad {
-      background: #fdecea;
-      color: #b42318;
-    }
-  </style>
-</head>
+      /* MOBILE STATUS */
+      @media (max-width: 640px) {
+        .status {
+          grid-column: span 1;
+        }
+      }
 
-<body>
+      .good {
+        background: #e6f7ec;
+        color: #0a7f42;
+      }
 
-<div class="container">
+      .bad {
+        background: #fdecea;
+        color: #b42318;
+      }
 
-  <h2>Laundry Tracker</h2>
-  <div class="date" id="todayDate"></div>
+      * {
+        box-sizing: border-box;
+      }
 
-  <form id="form">
+      .grid > * {
+        min-width: 0; /* 🔥 allows children to shrink */
+      }
 
-    <div class="card">
-      <h3>Staff</h3>
-      <select id="staff" required>
-        <option value="">Select Staff</option>
-        <option value="Daniel">Daniel</option>
-        <option value="Shayla">Shayla</option>
-      </select>
-    </div>
+      .calc-note {
+        font-size: 11px;
+        color: #888;
+        margin-top: -6px;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
 
-    <div class="card">
-      <h3>Time</h3>
-      <div class="grid">
-        <div class="input-group">
-          <div class="label">Clock In</div>
-          <input type="datetime-local" id="clockIn" required>
+  <body>
+    <div class="container">
+      <h2>Laundry Tracker</h2>
+      <div class="date" id="todayDate"></div>
+
+      <form id="form">
+        <div class="card">
+          <h3>Staff</h3>
+          <select id="staff" required>
+            <option value="">Select Staff</option>
+            <option value="Daniel">Daniel</option>
+            <option value="Shayla">Shayla</option>
+          </select>
         </div>
-        <div class="input-group">
-          <div class="label">Clock Out</div>
-          <input type="datetime-local" id="clockOut" required>
+
+        <div class="card">
+          <h3>Time</h3>
+          <div class="grid">
+            <div class="input-group">
+              <div class="label">Clock In</div>
+              <input type="datetime-local" id="clockIn" required />
+            </div>
+            <div class="input-group">
+              <div class="label">Clock Out</div>
+              <input type="datetime-local" id="clockOut" required />
+            </div>
+          </div>
         </div>
+
+        <div class="card">
+          <h3>Linen Counts</h3>
+          <div class="grid">
+            <div class="input-group">
+              <div class="label">Standard Pillowcase</div>
+              <input id="SPC" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">King Pillowcase</div>
+              <input id="KPC" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">King Flat</div>
+              <input id="KFl" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">King Fitted</div>
+              <input id="Kf" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Queen Flat</div>
+              <input id="QFl" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">Queen Fitted</div>
+              <input id="Qf" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Twin Flat</div>
+              <input id="TFl" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">Twin Fitted</div>
+              <input id="Tf" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Bath Towel</div>
+              <input id="T" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">Hand Towel</div>
+              <input id="HT" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Pool Towel</div>
+              <input id="PT" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">Wash Cloth</div>
+              <input id="WC" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Bath Mat</div>
+              <input id="BM" type="number" />
+            </div>
+            <div class="input-group">
+              <div class="label">Kitchen Towel</div>
+              <input id="KT" type="number" />
+            </div>
+
+            <div class="input-group">
+              <div class="label">Kitchen Wash Cloth</div>
+              <input id="KWC" type="number" />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <button type="submit">Calculate</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <h3>Performance</h3>
+        <div class="calc-note">
+          *Weight calculated per item type. Cost = hours × $17. Target ≤
+          $0.75/lb.
+        </div>
+        <div class="results" id="results"></div>
       </div>
     </div>
 
-    <div class="card">
-      <h3>Linen Counts</h3>
-      <div class="grid">
+    <script>
+      const weights = {
+        SPC: 0.21,
+        KPC: 0.27,
+        KFl: 1.63,
+        Kf: 1.52,
+        QFl: 1.31,
+        Qf: 1.31,
+        TFl: 1.01,
+        Tf: 0.78,
+        T: 1.17,
+        HT: 0.33,
+        PT: 1.08,
+        WC: 0.08,
+        BM: 0.58,
+        KT: 0.33,
+        KWC: 0.08,
+      };
 
-        <div class="input-group"><div class="label">Standard Pillowcase</div><input id="SPC" type="number"></div>
-        <div class="input-group"><div class="label">King Pillowcase</div><input id="KPC" type="number"></div>
+      const RATE = 17;
+      const TARGET = 0.75;
 
-        <div class="input-group"><div class="label">King Flat</div><input id="KFl" type="number"></div>
-        <div class="input-group"><div class="label">King Fitted</div><input id="Kf" type="number"></div>
+      // 📅 Display date
+      const now = new Date();
+      document.getElementById("todayDate").innerText = now.toLocaleDateString(
+        undefined,
+        {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+        },
+      );
 
-        <div class="input-group"><div class="label">Queen Flat</div><input id="QFl" type="number"></div>
-        <div class="input-group"><div class="label">Queen Fitted</div><input id="Qf" type="number"></div>
+      // 🛠️ Convert to local datetime format
+      function toLocalISOString(date) {
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16);
+      }
 
-        <div class="input-group"><div class="label">Twin Flat</div><input id="TFl" type="number"></div>
-        <div class="input-group"><div class="label">Twin Fitted</div><input id="Tf" type="number"></div>
+      // 🔥 BOTH clockIn & clockOut = current time
+      const currentTime = toLocalISOString(now);
+      document.getElementById("clockIn").value = currentTime;
+      document.getElementById("clockOut").value = currentTime;
 
-        <div class="input-group"><div class="label">Bath Towel</div><input id="T" type="number"></div>
-        <div class="input-group"><div class="label">Hand Towel</div><input id="HT" type="number"></div>
+      // 🧠 FORM SUBMIT CALCULATION
+      document.getElementById("form").addEventListener("submit", function (e) {
+        e.preventDefault();
 
-        <div class="input-group"><div class="label">Pool Towel</div><input id="PT" type="number"></div>
-        <div class="input-group"><div class="label">Wash Cloth</div><input id="WC" type="number"></div>
+        let totalWeight = 0;
 
-        <div class="input-group"><div class="label">Bath Mat</div><input id="BM" type="number"></div>
-        <div class="input-group"><div class="label">Kitchen Towel</div><input id="KT" type="number"></div>
+        Object.keys(weights).forEach((key) => {
+          const el = document.getElementById(key);
+          const val = el ? Number(el.value) : 0;
+          totalWeight += (val || 0) * weights[key];
+        });
 
-        <div class="input-group"><div class="label">Kitchen Wash Cloth</div><input id="KWC" type="number"></div>
+        const clockInVal = document.getElementById("clockIn").value;
+        const clockOutVal = document.getElementById("clockOut").value;
 
-      </div>
+        let hours = 0;
+
+        if (clockInVal && clockOutVal) {
+          const clockIn = new Date(clockInVal);
+          const clockOut = new Date(clockOutVal);
+
+          if (clockOut > clockIn) {
+            hours = (clockOut - clockIn) / 3600000;
+          }
+        }
+
+        const cost = hours * RATE;
+        const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
+        const lbsPerHour = hours > 0 ? totalWeight / hours : 0;
+
+        const isOnTarget = costPerLb <= TARGET && totalWeight > 0;
+
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.style.display = "grid";
+
+        resultsDiv.innerHTML = `
+    <div class="metric">
+      <div class="value">${totalWeight.toFixed(1)}</div>
+      <div class="metric-label">Total lbs</div>
     </div>
 
-    <div class="card">
-      <button type="submit">Calculate</button>
+    <div class="metric">
+      <div class="value">${hours.toFixed(2)}</div>
+      <div class="metric-label">Hours</div>
     </div>
 
-  </form>
+    <div class="metric">
+      <div class="value">$${cost.toFixed(2)}</div>
+      <div class="metric-label">Cost</div>
+    </div>
 
-  <div class="card results" id="results"></div>
+    <div class="metric">
+      <div class="value">$${costPerLb.toFixed(2)}</div>
+      <div class="metric-label">Cost / lb</div>
+    </div>
 
-</div>
+    <div class="metric">
+      <div class="value">${lbsPerHour.toFixed(1)}</div>
+      <div class="metric-label">lbs / hr</div>
+    </div>
 
-<script>
-const weights = {
-  SPC: 0.21, KPC: 0.27, KFl: 1.63, Kf: 1.52,
-  QFl: 1.31, Qf: 1.31, TFl: 1.01, Tf: 0.78,
-  T: 1.17, HT: 0.33, PT: 1.08, WC: 0.08,
-  BM: 0.58, KT: 0.33, KWC: 0.08
-};
-
-const RATE = 17;
-const TARGET = 0.75;
-
-const now = new Date();
-document.getElementById("todayDate").innerText =
-  now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-
-const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-  .toISOString().slice(0,16);
-document.getElementById("clockIn").value = localISOTime;
-
-document.getElementById("form").addEventListener("submit", function(e) {
-  e.preventDefault();
-
-  let totalWeight = 0;
-
-  Object.keys(weights).forEach(key => {
-    const val = Number(document.getElementById(key).value || 0);
-    totalWeight += val * weights[key];
-  });
-
-  const clockIn = new Date(document.getElementById("clockIn").value);
-  const clockOut = new Date(document.getElementById("clockOut").value);
-
-  let hours = 0;
-  if (clockOut > clockIn) {
-    hours = (clockOut - clockIn) / 3600000;
-  }
-
-  const cost = hours * RATE;
-  const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
-  const lbsPerHour = hours > 0 ? totalWeight / hours : 0;
-
-  const isOnTarget = costPerLb <= TARGET;
-
-  const resultsDiv = document.getElementById("results");
-  resultsDiv.style.display = "grid";
-
-  resultsDiv.innerHTML = `
-    <div class="metric"><div class="value">${totalWeight.toFixed(1)}</div><div class="metric-label">Total lbs</div></div>
-    <div class="metric"><div class="value">${hours.toFixed(2)}</div><div class="metric-label">Hours</div></div>
-    <div class="metric"><div class="value">$${cost.toFixed(2)}</div><div class="metric-label">Cost</div></div>
-    <div class="metric"><div class="value">$${costPerLb.toFixed(2)}</div><div class="metric-label">Cost / lb</div></div>
-    <div class="metric"><div class="value">${lbsPerHour.toFixed(1)}</div><div class="metric-label">lbs / hr</div></div>
-    <div class="status ${isOnTarget ? 'good' : 'bad'}">
-      ${isOnTarget ? 'ON TARGET ✅' : 'OFF TARGET ❌'}
+    <div class="status ${isOnTarget ? "good" : "bad"}">
+      ${
+        totalWeight === 0
+          ? "Enter linen counts"
+          : isOnTarget
+            ? "ON TARGET ✅"
+            : "OFF TARGET ❌"
+      }
     </div>
   `;
-});
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
