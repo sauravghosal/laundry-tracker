@@ -190,15 +190,16 @@
 
         <div class="card">
           <h3>Time</h3>
-          <div class="grid">
-            <div class="input-group">
-              <div class="label">Clock In</div>
-              <input type="datetime-local" id="clockIn" required />
-            </div>
-            <div class="input-group">
-              <div class="label">Clock Out</div>
-              <input type="datetime-local" id="clockOut" required />
-            </div>
+          <div class="input-group">
+            <div class="label">Total Hours Worked</div>
+            <input
+              type="number"
+              id="hoursWorked"
+              step="0.1"
+              value="6"
+              placeholder="e.g. 6"
+              required
+            />
           </div>
         </div>
 
@@ -336,18 +337,6 @@
         },
       );
 
-      // 🛠️ Convert to local datetime format
-      function toLocalISOString(date) {
-        return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-          .toISOString()
-          .slice(0, 16);
-      }
-
-      // 🔥 BOTH clockIn & clockOut = current time
-      const currentTime = toLocalISOString(now);
-      document.getElementById("clockIn").value = currentTime;
-      document.getElementById("clockOut").value = currentTime;
-
       // 🧠 FORM SUBMIT CALCULATION
       document.getElementById("form").addEventListener("submit", function (e) {
         e.preventDefault();
@@ -361,23 +350,13 @@
         });
 
         // Specialty linen (direct lbs)
-        const specialLbs = Number(document.getElementById("specialLbs")?.value || 0);
+        const specialLbs = Number(
+          document.getElementById("specialLbs")?.value || 0,
+        );
 
         totalWeight += specialLbs;
 
-        const clockInVal = document.getElementById("clockIn").value;
-        const clockOutVal = document.getElementById("clockOut").value;
-
-        let hours = 0;
-
-        if (clockInVal && clockOutVal) {
-          const clockIn = new Date(clockInVal);
-          const clockOut = new Date(clockOutVal);
-
-          if (clockOut > clockIn) {
-            hours = (clockOut - clockIn) / 3600000;
-          }
-        }
+       const hours = Number(document.getElementById("hoursWorked").value) || 0;
 
         const cost = hours * RATE;
         const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
