@@ -439,7 +439,11 @@
 
           const dueDate = now.toISOString().split("T")[0];
 
-          const dateObj = new Date(dueDate);
+          const dateObj = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+          );
 
           const year = dateObj.getFullYear();
 
