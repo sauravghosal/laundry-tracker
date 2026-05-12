@@ -290,6 +290,20 @@
         </div>
 
         <div class="card">
+          <h3>Notes</h3>
+
+          <div class="input-group">
+            <div class="label">Notes / Other Tasks Completed</div>
+
+            <input
+              id="notes"
+              type="text"
+              placeholder="Include any additional tasks or issues that may have reduced laundry output..."
+            />
+          </div>
+        </div>
+
+        <div class="card">
           <button type="submit">Calculate</button>
         </div>
       </form>
@@ -338,72 +352,154 @@
       );
 
       // 🧠 FORM SUBMIT CALCULATION
-      document.getElementById("form").addEventListener("submit", function (e) {
-        e.preventDefault();
+      document
+        .getElementById("form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-        let totalWeight = 0;
+          let totalWeight = 0;
 
-        Object.keys(weights).forEach((key) => {
-          const el = document.getElementById(key);
-          const val = el ? Number(el.value) : 0;
-          totalWeight += (val || 0) * weights[key];
+          Object.keys(weights).forEach((key) => {
+            const el = document.getElementById(key);
+            const val = el ? Number(el.value) : 0;
+            totalWeight += (val || 0) * weights[key];
+          });
+
+          // Specialty linen (direct lbs)
+          const specialLbs = Number(
+            document.getElementById("specialLbs")?.value || 0,
+          );
+
+          totalWeight += specialLbs;
+
+          const hours =
+            Number(document.getElementById("hoursWorked").value) || 0;
+
+          const cost = hours * RATE;
+          const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
+          const lbsPerHour = hours > 0 ? totalWeight / hours : 0;
+
+          const isOnTarget = costPerLb <= TARGET && totalWeight > 0;
+
+          const resultsDiv = document.getElementById("results");
+          resultsDiv.style.display = "grid";
+
+          resultsDiv.innerHTML = `
+          <div class="metric">
+            <div class="value">${totalWeight.toFixed(1)}</div>
+            <div class="metric-label">Total lbs</div>
+          </div>
+
+          <div class="metric">
+            <div class="value">${hours.toFixed(2)}</div>
+            <div class="metric-label">Hours</div>
+          </div>
+
+          <div class="metric">
+            <div class="value">$${cost.toFixed(2)}</div>
+            <div class="metric-label">Cost</div>
+          </div>
+
+          <div class="metric">
+            <div class="value">$${costPerLb.toFixed(2)}</div>
+            <div class="metric-label">Cost / lb</div>
+          </div>
+
+          <div class="metric">
+            <div class="value">${lbsPerHour.toFixed(1)}</div>
+            <div class="metric-label">lbs / hr</div>
+          </div>
+
+          <div class="status ${isOnTarget ? "good" : "bad"}">
+            ${
+              totalWeight === 0
+                ? "Enter linen counts"
+                : isOnTarget
+                  ? "ON TARGET ✅"
+                  : "OFF TARGET ❌"
+            }
+          </div>
+        `;
+
+          // =========================
+          // DATE CALCULATIONS
+          // =========================
+
+          // Current submission time
+
+          const now = new Date();
+
+          // If before 9 AM, use previous day
+
+          if (now.getHours() < 9) {
+            now.setDate(now.getDate() - 1);
+          }
+
+          // Format YYYY-MM-DD
+
+          const dueDate = now.toISOString().split("T")[0];
+
+          const dateObj = new Date(dueDate);
+
+          const year = dateObj.getFullYear();
+
+          const firstJan = new Date(year, 0, 1);
+
+          const days = Math.floor((dateObj - firstJan) / 86400000);
+
+          const week = Math.ceil((days + firstJan.getDay() + 1) / 7);
+
+          // =========================
+          // SEND TO ZAPIER
+          // =========================
+
+          await fetch(
+            "https://hooks.zapier.com/hooks/catch/15804429/4yw9dy5/",
+            {
+              method: "POST",
+
+              body: JSON.stringify({
+                dayOfWeek: dateObj.toLocaleDateString(undefined, {
+                  weekday: "long",
+                }),
+
+                yearWeek: `${year}${week}`,
+
+                dueDate,
+
+                staff: document.getElementById("staff").value,
+
+                SPC: Number(document.getElementById("SPC").value || 0),
+                KPC: Number(document.getElementById("KPC").value || 0),
+                KFl: Number(document.getElementById("KFl").value || 0),
+                Kf: Number(document.getElementById("Kf").value || 0),
+                QFl: Number(document.getElementById("QFl").value || 0),
+                Qf: Number(document.getElementById("Qf").value || 0),
+                TFl: Number(document.getElementById("TFl").value || 0),
+                Tf: Number(document.getElementById("Tf").value || 0),
+                T: Number(document.getElementById("T").value || 0),
+                HT: Number(document.getElementById("HT").value || 0),
+                PT: Number(document.getElementById("PT").value || 0),
+                WC: Number(document.getElementById("WC").value || 0),
+                BM: Number(document.getElementById("BM").value || 0),
+                KT: Number(document.getElementById("KT").value || 0),
+                KWC: Number(document.getElementById("KWC").value || 0),
+
+                specialLbs: specialLbs,
+
+                totalWeight,
+
+                hours,
+
+                lbsPerHour,
+
+                costPerLb,
+
+                notes: document.getElementById("notes").value,
+              }),
+            },
+          );
         });
-
-        // Specialty linen (direct lbs)
-        const specialLbs = Number(
-          document.getElementById("specialLbs")?.value || 0,
-        );
-
-        totalWeight += specialLbs;
-
-       const hours = Number(document.getElementById("hoursWorked").value) || 0;
-
-        const cost = hours * RATE;
-        const costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
-        const lbsPerHour = hours > 0 ? totalWeight / hours : 0;
-
-        const isOnTarget = costPerLb <= TARGET && totalWeight > 0;
-
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.style.display = "grid";
-
-        resultsDiv.innerHTML = `
-    <div class="metric">
-      <div class="value">${totalWeight.toFixed(1)}</div>
-      <div class="metric-label">Total lbs</div>
-    </div>
-
-    <div class="metric">
-      <div class="value">${hours.toFixed(2)}</div>
-      <div class="metric-label">Hours</div>
-    </div>
-
-    <div class="metric">
-      <div class="value">$${cost.toFixed(2)}</div>
-      <div class="metric-label">Cost</div>
-    </div>
-
-    <div class="metric">
-      <div class="value">$${costPerLb.toFixed(2)}</div>
-      <div class="metric-label">Cost / lb</div>
-    </div>
-
-    <div class="metric">
-      <div class="value">${lbsPerHour.toFixed(1)}</div>
-      <div class="metric-label">lbs / hr</div>
-    </div>
-
-    <div class="status ${isOnTarget ? "good" : "bad"}">
-      ${
-        totalWeight === 0
-          ? "Enter linen counts"
-          : isOnTarget
-            ? "ON TARGET ✅"
-            : "OFF TARGET ❌"
-      }
-    </div>
-  `;
-      });
     </script>
   </body>
 </html>
