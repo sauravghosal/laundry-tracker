@@ -1,0 +1,1182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Laundry Productivity Tracker — Par Levels</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  :root {
+    --bg: #f4f6f5;
+    --surface: #ffffff;
+    --surface-2: #e9edeb;
+    --surface-3: #dde3e0;
+    --border: #d3d9d6;
+    --text: #1b2422;
+    --text-muted: #5b6864;
+    --accent: #2e6f72;
+    --accent-strong: #1f5154;
+    --accent-wash: #dcebea;
+    --good: #3e7d4c;
+    --good-bg: #e3f3e6;
+    --warn: #b8622a;
+    --warn-bg: #fbe8e0;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 4px 16px rgba(20, 30, 28, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12181a;
+      --surface: #1a2124;
+      --surface-2: #212a2d;
+      --surface-3: #293336;
+      --border: #313c3f;
+      --text: #e7eded;
+      --text-muted: #93a29e;
+      --accent: #5fb8b8;
+      --accent-strong: #7fcfcc;
+      --accent-wash: #1e3436;
+      --good: #6fcb84;
+      --good-bg: #1c2b20;
+      --warn: #e1934f;
+      --warn-bg: #332318;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12181a; --surface: #1a2124; --surface-2: #212a2d; --surface-3: #293336;
+    --border: #313c3f; --text: #e7eded; --text-muted: #93a29e;
+    --accent: #5fb8b8; --accent-strong: #7fcfcc; --accent-wash: #1e3436;
+    --good: #6fcb84; --good-bg: #1c2b20;
+    --warn: #e1934f; --warn-bg: #332318;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f5; --surface: #ffffff; --surface-2: #e9edeb; --surface-3: #dde3e0;
+    --border: #d3d9d6; --text: #1b2422; --text-muted: #5b6864;
+    --accent: #2e6f72; --accent-strong: #1f5154; --accent-wash: #dcebea;
+    --good: #3e7d4c; --good-bg: #e3f3e6;
+    --warn: #b8622a; --warn-bg: #fbe8e0;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 4px 16px rgba(20, 30, 28, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  .tabnum { font-variant-numeric: tabular-nums; }
+  a, button { font: inherit; color: inherit; }
+
+  nav.topnav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .topnav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 10px 24px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .topnav-link {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .topnav-link:hover { color: var(--accent-strong); }
+  .topnav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .topnav-link.active {
+    color: var(--accent-strong);
+    background: var(--accent-wash);
+    border-color: var(--border);
+  }
+
+  header.page {
+    padding: 28px 24px 20px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 4px 0 6px;
+    text-wrap: balance;
+  }
+  .subhead {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 68ch;
+  }
+
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  @media (max-width: 480px) {
+    header.page { padding: 20px 16px 16px; }
+    h1 { font-size: 21px; }
+    .layout { padding: 0 16px 40px; gap: 14px; }
+  }
+
+  /* ---------- Summary bar ---------- */
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stat-value {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 26px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value.warn { color: var(--warn); }
+  .stat small { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .summary-actions { margin-left: auto; display: flex; gap: 8px; }
+  @media (max-width: 640px) {
+    .summary { gap: 16px 20px; }
+    .summary-actions { margin-left: 0; width: 100%; flex-direction: column; }
+    .summary-actions .btn { width: 100%; padding: 11px 14px; }
+  }
+
+  .btn {
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+  /* ---------- Property pickers ---------- */
+  .pickers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 760px) {
+    .pickers { grid-template-columns: 1fr; }
+  }
+
+  .picker {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .picker-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .picker-title {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .picker-count {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: var(--accent-strong);
+    background: var(--accent-wash);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .picker-body { display: none; }
+  .picker.open .picker-body { display: block; }
+  .picker-chevron { color: var(--text-muted); font-size: 11px; transition: transform 0.15s ease; }
+  .picker.open .picker-chevron { transform: rotate(90deg); }
+
+  .picker-controls {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  input[type="search"] {
+    width: 100%;
+    padding: 7px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+  }
+  input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .picker-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  .chip-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .chip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip-btn.active {
+    background: var(--accent-wash);
+    border-color: var(--accent);
+    color: var(--accent-strong);
+  }
+
+  .prop-scroll { max-height: 280px; overflow-y: auto; padding: 4px 0 8px; }
+  .group-head {
+    padding: 10px 14px 4px;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .prop-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .prop-row:hover { background: var(--surface-2); }
+  .prop-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .prop-row input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .prop-row .prop-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prop-row.checked .prop-name { color: var(--accent-strong); font-weight: 600; }
+  .no-results { padding: 14px; color: var(--text-muted); font-size: 12.5px; }
+
+  @media (max-width: 480px) {
+    .prop-row { padding: 10px 14px; font-size: 14px; }
+    .prop-row input[type="checkbox"] { width: 18px; height: 18px; }
+    .chip-btn { padding: 6px 12px; font-size: 12.5px; }
+  }
+
+  /* ---------- Table ---------- */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-card h2 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin: 0;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 1200px; }
+  th, td { padding: 6px 10px; text-align: right; font-size: 13px; white-space: nowrap; }
+  th:first-child, td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+    min-width: 168px;
+  }
+  thead th:first-child { background: var(--surface-2); }
+  thead th {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 10px;
+    background: var(--surface-2);
+  }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--surface-2); }
+  tbody tr:hover td:not(:first-child) { background: var(--surface-2); }
+  tbody tr:hover td:first-child { background: var(--surface-3); }
+
+  td.derived {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+  td.derived.nonzero { color: var(--accent-strong); font-weight: 600; }
+
+  td input[type="number"] {
+    width: 64px;
+    padding: 6px 7px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    text-align: right;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  td input[type="number"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  td.par input[type="number"] { background: transparent; border-style: dashed; color: var(--text-muted); }
+
+  td.total {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    white-space: nowrap;
+  }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+
+  tfoot td {
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  tfoot td:first-child { background: var(--surface-2); }
+
+  .section-note {
+    padding: 10px 18px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .section-note b { color: var(--text); }
+
+  /* ---------- Table → stacked cards on small screens ---------- */
+  @media (max-width: 640px) {
+    .table-scroll { overflow-x: visible; }
+    table { min-width: 0; width: 100%; }
+    thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    tbody, tfoot { display: block; }
+    tr { display: block; padding: 12px 16px 14px; }
+    tbody tr:not(:last-child) { border-bottom: 8px solid var(--surface-2); }
+    td {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      width: 100%;
+      max-width: 100%;
+      padding: 7px 0;
+      border: none !important;
+      text-align: left;
+      white-space: normal;
+      box-sizing: border-box;
+    }
+    td:not([data-label]):not(:first-child) { display: none; }
+    td:first-child {
+      position: static;
+      background: transparent;
+      min-width: 0;
+      padding: 2px 0 10px;
+      font-weight: 700;
+      font-size: 14.5px;
+    }
+    td::before {
+      content: attr(data-label);
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    td input[type="number"] { width: 140px; max-width: 100%; font-size: 16px; padding: 8px 10px; box-sizing: border-box; }
+    td.total { font-size: 15px; }
+    tfoot tr { background: var(--surface-2); border-radius: 8px; }
+  }
+
+  @media (max-width: 640px) {
+    input[type="search"] { font-size: 16px; padding: 9px 10px; }
+  }
+
+  footer.page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    input, .btn, .chip-btn, .prop-row { transition: background-color 0.12s ease, border-color 0.12s ease; }
+  }
+</style>
+</head>
+
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="topnav-link" href="inhouse.html">In House</a>
+    <a class="topnav-link" href="index.html">Commercial</a>
+    <a class="topnav-link" href="packlist.html">Pack List</a>
+    <a class="topnav-link active" href="parlevels.html">Par Levels</a>
+  </div>
+</nav>
+
+<header class="page">
+  <div class="eyebrow">Inventory</div>
+  <h1>Laundry Tracker — Par Levels</h1>
+  <p class="subhead">Every cabin is assumed clean &amp; stocked, so 1&times; par is already deployed in the field — that's factored in automatically. Check off cabins to prefill Packed and Dirty Returns from their property par counts. Add Clean Shelf counts by hand, and estimate Dirty Sorted coming back from commercial. Everything totals up and checks against 2&times; par.</p>
+</header>
+
+<div class="layout">
+  <div class="summary" id="summary">
+    <div class="stat">
+      <div class="stat-label">Items tracked</div>
+      <div class="stat-value tabnum" id="statCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Below par</div>
+      <div class="stat-value tabnum warn" id="statBelow">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total on hand</div>
+      <div class="stat-value tabnum" id="statOnHand">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total short</div>
+      <div class="stat-value tabnum warn" id="statShort">0<small>&nbsp;pcs</small></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total to order</div>
+      <div class="stat-value tabnum" id="statOrder">0<small>&nbsp;dz</small></div>
+    </div>
+    <div class="summary-actions">
+      <button class="btn" id="copyBtn" type="button">Copy shortage report</button>
+      <button class="btn" id="resetBtn" type="button">Reset all</button>
+    </div>
+  </div>
+
+  <div class="pickers">
+    <div class="picker" id="picker-packed">
+      <div class="picker-head" data-toggle="picker-packed">
+        <span class="picker-title">Packed — select cabins</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="picker-count" id="count-packed">0 selected</span>
+          <span class="picker-chevron">&#9656;</span>
+        </span>
+      </div>
+      <div class="picker-body">
+        <div class="picker-controls">
+          <input type="search" placeholder="Search cabins…" autocomplete="off" data-search="packed">
+          <div class="picker-actions">
+            <button class="chip-btn" data-action="select-shown" data-picker="packed">Select shown</button>
+            <button class="chip-btn" data-action="clear-all" data-picker="packed">Clear all</button>
+            <button class="chip-btn" data-action="show-selected" data-picker="packed">Show selected</button>
+          </div>
+        </div>
+        <div class="prop-scroll" data-list="packed"></div>
+      </div>
+    </div>
+
+    <div class="picker" id="picker-dirty">
+      <div class="picker-head" data-toggle="picker-dirty">
+        <span class="picker-title">Dirty Returns — select cabins</span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="picker-count" id="count-dirty">0 selected</span>
+          <span class="picker-chevron">&#9656;</span>
+        </span>
+      </div>
+      <div class="picker-body">
+        <div class="picker-controls">
+          <input type="search" placeholder="Search cabins…" autocomplete="off" data-search="dirty">
+          <div class="picker-actions">
+            <button class="chip-btn" data-action="select-shown" data-picker="dirty">Select shown</button>
+            <button class="chip-btn" data-action="clear-all" data-picker="dirty">Clear all</button>
+            <button class="chip-btn" data-action="show-selected" data-picker="dirty">Show selected</button>
+          </div>
+        </div>
+        <div class="prop-scroll" data-list="dirty"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h2>Linen Inventory vs. Par</h2>
+    <div class="section-note"><b>In Cabins (1&times;)</b> is fixed at each item's 1&times; property total, since every cabin is assumed clean &amp; stocked — it's counted toward the total automatically and isn't editable. <b>Packed</b> and <b>Dirty Returns</b> are set by the cabin pickers above — check/uncheck cabins to change them. <b>Clean Shelf</b>, <b>Secret Stash</b>, and <b>Unopened</b> are entered by hand. <b>Dirty Sorted</b> is dirty linen already sorted and coming back from commercial — bag counts aren't exact, so enter your best estimate per item. <b>Par (2&times;)</b> is fixed at double the property totals and isn't editable. <b>Order (dz)</b> starts at 0 — enter how many dozens you're ordering. <b>New Par</b> is a live preview of Par + Order — what your par target would become if you placed that order and adopted it as the new baseline.</div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>In Cabins (1&times;)</th>
+            <th>Packed</th>
+            <th>Dirty Returns</th>
+            <th>Clean Shelf</th>
+            <th>Secret Stash</th>
+            <th>Unopened</th>
+            <th>Dirty Sorted</th>
+            <th>Total</th>
+            <th>Par (2&times;)</th>
+            <th>Status</th>
+            <th>Order (dz)</th>
+            <th>New Par</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+        <tfoot>
+          <tr>
+            <td>All items</td>
+            <td class="tabnum" id="footInCabins" data-label="In Cabins (1×)">0</td>
+            <td class="tabnum" id="footPacked" data-label="Packed">0</td>
+            <td class="tabnum" id="footDirty" data-label="Dirty Returns">0</td>
+            <td></td>
+            <td class="tabnum" id="footStash" data-label="Secret Stash">0</td>
+            <td class="tabnum" id="footUnopened" data-label="Unopened">0</td>
+            <td></td>
+            <td class="tabnum" id="footTotal" data-label="Total">0</td>
+            <td class="tabnum" id="footPar" data-label="Par (2×)">0</td>
+            <td></td>
+            <td class="tabnum" id="footOrder" data-label="Order (dz)">0</td>
+            <td class="tabnum" id="footNewPar" data-label="New Par">0</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer class="page">
+  Cabin par counts match the Pack List page. Selections, manual counts, and par targets save to this browser automatically.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Shared property data (matches packlist.html) ----------
+  var COLUMNS = [
+    ["spc", "Standard Pillowcase"],
+    ["kpc", "King Pillowcase"],
+    ["kfl", "King Flat"],
+    ["kf",  "King Fitted"],
+    ["qfl", "Queen Flat"],
+    ["qf",  "Queen Fitted"],
+    ["tfl", "Twin Flat"],
+    ["tf",  "Twin Fitted"],
+    ["bt",  "Bath Towel"],
+    ["ht",  "Hand Towel"],
+    ["pt",  "Pool Towel"],
+    ["wc",  "Wash Cloth"],
+    ["bm",  "Bath Mat"],
+    ["kwc", "Kitchen Wash Cloth"],
+    ["kt",  "Kitchen Towel"],
+    ["om",  "Oven Mitt"],
+    ["bwc", "Black Wash Cloth"]
+  ];
+
+  var GROUPS = {
+    tinyhomes: "Tiny Homes — 1685 Newport Hwy",
+    cabins: "Cabins & Houses"
+  };
+  var GROUP_ORDER = ["tinyhomes", "cabins"];
+
+  function item(kss, qss, tss, spc, kpc, kfl, kf, qfl, qf, tfl, tf, bt, ht, pt, wc, bm, kwc, kt, om, bwc) {
+    return { spc:spc, kpc:kpc, kfl:kfl, kf:kf, qfl:qfl, qf:qf, tfl:tfl, tf:tf,
+             bt:bt, ht:ht, pt:pt, wc:wc, bm:bm, kwc:kwc, kt:kt, om:om, bwc:bwc };
+  }
+
+  var PROPERTIES = [
+    { id:"110", name:"110 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"111", name:"111 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"112", name:"112 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"113", name:"113 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"114", name:"114 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"115", name:"115 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"116", name:"116 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"117", name:"117 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"118", name:"118 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"119", name:"119 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"121", name:"121 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"122", name:"122 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"123", name:"123 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"124", name:"124 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"125", name:"125 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"126", name:"126 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"127", name:"127 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"128", name:"128 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"129", name:"129 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"130", name:"130 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"131", name:"131 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"132", name:"132 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"133", name:"133 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"134a", name:"134 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"135a", name:"135 - 1685 Newport Highway", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"136", name:"136 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"210", name:"210 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"211", name:"211 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"212", name:"212 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"213", name:"213 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"214", name:"214 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"215", name:"215 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"216", name:"216 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"217", name:"217 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"218", name:"218 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"134b", name:"134 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,3,3,0,1,5,1,0,5,1,1,1,0,1) },
+    { id:"135b", name:"135 - 1685 Newport Hwy", group:"tinyhomes", items:item(0,2,1,6,0,0,0,3,3,0,1,5,1,0,5,1,1,1,0,1) },
+    { id:"rast1004", name:"1004 Rast Court", group:"cabins", items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"pinyon1145", name:"1145 Pinyon Circle", group:"cabins", items:item(1,2,1,6,2,1,1,2,2,1,1,14,3,0,11,3,1,1,1,3) },
+    { id:"pinyon1165", name:"1165 Pinyon Circle", group:"cabins", items:item(6,6,12,36,12,6,6,6,6,12,12,72,14,0,60,12,3,3,2,12) },
+    { id:"bald1509", name:"1509 Bald Eagle", group:"cabins", items:item(4,1,0,2,8,4,4,1,1,0,0,20,6,0,20,4,2,2,2,4) },
+    { id:"bald1510", name:"1510 Bald Eagle", group:"cabins", items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"bald1512", name:"1512 Bald Eagle", group:"cabins", items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"woodcock2228", name:"2228 Woodcock Trl", group:"cabins", items:item(2,2,0,4,4,2,2,2,2,0,0,16,4,0,14,2,1,1,2,2) },
+    { id:"woodcock2236", name:"2236 Woodcock", group:"cabins", items:item(3,3,0,6,6,3,3,3,3,0,0,20,6,0,17,3,2,2,2,3) },
+    { id:"umc2251", name:"2251 Upper Middle Creek #16", group:"cabins", items:item(2,4,0,8,4,2,2,4,4,0,0,20,4,0,16,4,2,2,2,4) },
+    { id:"bluff2532", name:"2532 Bluff Mountain", group:"cabins", items:item(3,1,1,4,6,3,3,1,1,1,1,20,5,0,17,3,2,2,2,3) },
+    { id:"bluff2540", name:"2540 Bluff Mountain", group:"cabins", items:item(3,3,0,6,6,3,3,3,3,0,0,24,6,0,20,4,2,2,2,4) },
+    { id:"bluff2544", name:"2544 Bluff Mountain", group:"cabins", items:item(5,2,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"bluff2550", name:"2550 Bluff Mountain", group:"cabins", items:item(5,2,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"bluff2536", name:"2536 Bluff Mountain", group:"cabins", items:item(0,0,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"rainbow615b", name:"615 Rainbow Road #2", group:"cabins", items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"rainbow615c", name:"615 Rainbow Road #3", group:"cabins", items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"mtntop706", name:"706 Mountain Top", group:"cabins", items:item(1,1,0,2,2,1,1,1,1,0,0,6,2,4,5,1,1,1,2,1) },
+    { id:"mtntop712", name:"712 Mountain Top", group:"cabins", items:item(4,2,0,4,8,4,4,2,2,0,0,20,6,12,20,4,2,2,2,4) },
+    { id:"mtntop722", name:"722 Mountain Top", group:"cabins", items:item(2,6,0,12,4,2,2,6,6,0,0,28,7,14,22,6,2,2,2,6) },
+    { id:"mtntop729", name:"729 Mountain Top", group:"cabins", items:item(3,1,0,2,6,3,3,1,1,0,0,16,4,8,13,3,2,2,2,3) },
+    { id:"mtntop737", name:"737 Mountain Top", group:"cabins", items:item(5,2,2,8,10,5,5,2,2,2,2,28,9,14,22,6,2,2,2,6) },
+    { id:"mtntop745", name:"745 Mountain Top", group:"cabins", items:item(5,3,0,6,10,5,5,3,3,0,0,28,9,14,22,6,2,2,2,6) }
+  ];
+
+  var PROP_BY_ID = {};
+  PROPERTIES.forEach(function (p) { PROP_BY_ID[p.id] = p; });
+
+  // 1x par = sum of every property's par count for that item — the linen already
+  // deployed in the cabins themselves, assuming every cabin is currently clean & stocked.
+  var ONE_PAR = {};
+  COLUMNS.forEach(function (c) { ONE_PAR[c[0]] = 0; });
+  PROPERTIES.forEach(function (p) {
+    COLUMNS.forEach(function (c) { ONE_PAR[c[0]] += p.items[c[0]]; });
+  });
+
+  // 2x par default target = double the 1x property total (one set in use, one set cycling).
+  var DEFAULT_PAR = {};
+  COLUMNS.forEach(function (c) { DEFAULT_PAR[c[0]] = ONE_PAR[c[0]] * 2; });
+
+  // ---------- Persisted state ----------
+  var STORE_KEY = "parlevels_v2";
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return {};
+      return JSON.parse(raw) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  var state = loadState();
+  if (!state.packedIds) state.packedIds = [];
+  if (!state.dirtyIds) state.dirtyIds = [];
+  if (!state.shelf) state.shelf = {};
+  if (!state.commercial) state.commercial = {};
+  if (!state.stash) state.stash = {};
+  if (!state.unopened) state.unopened = {};
+  if (!state.order) state.order = {};
+
+  var selectedPacked = new Set(state.packedIds);
+  var selectedDirty = new Set(state.dirtyIds);
+
+  function saveState() {
+    state.packedIds = Array.from(selectedPacked);
+    state.dirtyIds = Array.from(selectedDirty);
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  function fmt(n) { return n.toLocaleString("en-US"); }
+
+  var DOZEN = 12;
+  function toDoz(pieces) {
+    var d = Math.round((pieces / DOZEN) * 10) / 10;
+    return d % 1 === 0 ? String(d) : d.toFixed(1);
+  }
+
+  function sumSelected(idSet) {
+    var totals = {};
+    COLUMNS.forEach(function (c) { totals[c[0]] = 0; });
+    idSet.forEach(function (id) {
+      var p = PROP_BY_ID[id];
+      if (!p) return;
+      COLUMNS.forEach(function (c) { totals[c[0]] += p.items[c[0]]; });
+    });
+    return totals;
+  }
+
+  // ---------- Property pickers ----------
+  function buildPicker(kind, selectedSet) {
+    var listEl = document.querySelector('[data-list="' + kind + '"]');
+    var searchEl = document.querySelector('[data-search="' + kind + '"]');
+    var countEl = document.getElementById("count-" + kind);
+    var showSelectedBtn = document.querySelector('.chip-btn[data-picker="' + kind + '"][data-action="show-selected"]');
+    var showSelectedOnly = false;
+
+    function render(filter) {
+      filter = (filter || "").trim().toLowerCase();
+      listEl.innerHTML = "";
+      var any = false;
+
+      GROUP_ORDER.forEach(function (gid) {
+        var rows = PROPERTIES.filter(function (p) {
+          return p.group === gid
+            && (!filter || p.name.toLowerCase().indexOf(filter) !== -1)
+            && (!showSelectedOnly || selectedSet.has(p.id));
+        });
+        if (rows.length === 0) return;
+        any = true;
+
+        var head = document.createElement("div");
+        head.className = "group-head";
+        head.textContent = GROUPS[gid] + " (" + rows.length + ")";
+        listEl.appendChild(head);
+
+        rows.forEach(function (p) {
+          var row = document.createElement("label");
+          row.className = "prop-row" + (selectedSet.has(p.id) ? " checked" : "");
+          var cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = selectedSet.has(p.id);
+          cb.addEventListener("change", function () {
+            if (cb.checked) selectedSet.add(p.id); else selectedSet.delete(p.id);
+            row.classList.toggle("checked", cb.checked);
+            countEl.textContent = selectedSet.size + " selected";
+            saveState();
+            if (showSelectedOnly && !cb.checked) render(searchEl.value);
+            renderTotals();
+          });
+          var name = document.createElement("span");
+          name.className = "prop-name";
+          name.textContent = p.name;
+          row.appendChild(cb);
+          row.appendChild(name);
+          listEl.appendChild(row);
+        });
+      });
+
+      if (!any) {
+        var empty = document.createElement("div");
+        empty.className = "no-results";
+        empty.textContent = showSelectedOnly
+          ? "No cabins selected yet."
+          : "No cabins match “" + filter + "”.";
+        listEl.appendChild(empty);
+      }
+    }
+
+    searchEl.addEventListener("input", function () { render(searchEl.value); });
+
+    document.querySelectorAll('.chip-btn[data-picker="' + kind + '"]').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var action = btn.getAttribute("data-action");
+        if (action === "select-shown") {
+          var filter = searchEl.value.trim().toLowerCase();
+          PROPERTIES.filter(function (p) { return !filter || p.name.toLowerCase().indexOf(filter) !== -1; })
+            .forEach(function (p) { selectedSet.add(p.id); });
+        } else if (action === "clear-all") {
+          selectedSet.clear();
+        } else if (action === "show-selected") {
+          showSelectedOnly = !showSelectedOnly;
+          showSelectedBtn.classList.toggle("active", showSelectedOnly);
+          showSelectedBtn.textContent = showSelectedOnly ? "Show all" : "Show selected";
+        }
+        countEl.textContent = selectedSet.size + " selected";
+        saveState();
+        render(searchEl.value);
+        renderTotals();
+      });
+    });
+
+    countEl.textContent = selectedSet.size + " selected";
+    render("");
+
+    return {
+      refresh: function () {
+        searchEl.value = "";
+        showSelectedOnly = false;
+        showSelectedBtn.classList.remove("active");
+        showSelectedBtn.textContent = "Show selected";
+        countEl.textContent = selectedSet.size + " selected";
+        render("");
+      }
+    };
+  }
+
+  document.querySelectorAll(".picker-head").forEach(function (head) {
+    head.addEventListener("click", function () {
+      document.getElementById(head.getAttribute("data-toggle")).classList.toggle("open");
+    });
+  });
+
+  var packedPicker = buildPicker("packed", selectedPacked);
+  var dirtyPicker = buildPicker("dirty", selectedDirty);
+
+  // ---------- Table ----------
+  var rowsEl = document.getElementById("rows");
+  var footInCabins = document.getElementById("footInCabins");
+  var footPacked = document.getElementById("footPacked");
+  var footDirty = document.getElementById("footDirty");
+  var footStash = document.getElementById("footStash");
+  var footUnopened = document.getElementById("footUnopened");
+  var footTotal = document.getElementById("footTotal");
+  var footPar = document.getElementById("footPar");
+  var footOrder = document.getElementById("footOrder");
+  var footNewPar = document.getElementById("footNewPar");
+  var statCount = document.getElementById("statCount");
+  var statBelow = document.getElementById("statBelow");
+  var statOnHand = document.getElementById("statOnHand");
+  var statShort = document.getElementById("statShort");
+  var statOrder = document.getElementById("statOrder");
+
+  function numVal(id) {
+    var el = document.getElementById(id);
+    var v = el ? Number(el.value) : 0;
+    return isNaN(v) ? 0 : v;
+  }
+
+  function renderRows() {
+    rowsEl.innerHTML = "";
+    COLUMNS.forEach(function (c) {
+      var key = c[0], label = c[1];
+      var tr = document.createElement("tr");
+
+      var nameTd = document.createElement("td");
+      nameTd.textContent = label;
+      tr.appendChild(nameTd);
+
+      var inCabinsTd = document.createElement("td");
+      inCabinsTd.className = "derived nonzero";
+      inCabinsTd.id = "incabins_" + key;
+      inCabinsTd.setAttribute("data-label", "In Cabins (1×)");
+      inCabinsTd.textContent = fmt(ONE_PAR[key]);
+      tr.appendChild(inCabinsTd);
+
+      var packedTd = document.createElement("td");
+      packedTd.className = "derived";
+      packedTd.id = "packed_" + key;
+      packedTd.setAttribute("data-label", "Packed");
+      tr.appendChild(packedTd);
+
+      var dirtyTd = document.createElement("td");
+      dirtyTd.className = "derived";
+      dirtyTd.id = "dirty_" + key;
+      dirtyTd.setAttribute("data-label", "Dirty Returns");
+      tr.appendChild(dirtyTd);
+
+      var shelfTd = document.createElement("td");
+      shelfTd.setAttribute("data-label", "Clean Shelf");
+      var shelfInput = document.createElement("input");
+      shelfInput.type = "number";
+      shelfInput.min = "0";
+      shelfInput.id = "shelf_" + key;
+      var sv = state.shelf[key];
+      shelfInput.value = sv === undefined || sv === null || sv === 0 ? "" : sv;
+      shelfInput.addEventListener("input", function () {
+        var n = Number(shelfInput.value);
+        state.shelf[key] = isNaN(n) ? 0 : n;
+        saveState();
+        renderTotals();
+      });
+      shelfTd.appendChild(shelfInput);
+      tr.appendChild(shelfTd);
+
+      var stashTd = document.createElement("td");
+      stashTd.setAttribute("data-label", "Secret Stash");
+      var stashInput = document.createElement("input");
+      stashInput.type = "number";
+      stashInput.min = "0";
+      stashInput.id = "stash_" + key;
+      var stv = state.stash[key];
+      stashInput.value = stv === undefined || stv === null || stv === 0 ? "" : stv;
+      stashInput.addEventListener("input", function () {
+        var n = Number(stashInput.value);
+        state.stash[key] = isNaN(n) ? 0 : n;
+        saveState();
+        renderTotals();
+      });
+      stashTd.appendChild(stashInput);
+      tr.appendChild(stashTd);
+
+      var unopenedTd = document.createElement("td");
+      unopenedTd.setAttribute("data-label", "Unopened");
+      var unopenedInput = document.createElement("input");
+      unopenedInput.type = "number";
+      unopenedInput.min = "0";
+      unopenedInput.id = "unopened_" + key;
+      var uov = state.unopened[key];
+      unopenedInput.value = uov === undefined || uov === null || uov === 0 ? "" : uov;
+      unopenedInput.addEventListener("input", function () {
+        var n = Number(unopenedInput.value);
+        state.unopened[key] = isNaN(n) ? 0 : n;
+        saveState();
+        renderTotals();
+      });
+      unopenedTd.appendChild(unopenedInput);
+      tr.appendChild(unopenedTd);
+
+      var commTd = document.createElement("td");
+      commTd.setAttribute("data-label", "Dirty Sorted");
+      var commInput = document.createElement("input");
+      commInput.type = "number";
+      commInput.min = "0";
+      commInput.placeholder = "Est.";
+      commInput.id = "comm_" + key;
+      var cv = state.commercial[key];
+      commInput.value = cv === undefined || cv === null || cv === 0 ? "" : cv;
+      commInput.addEventListener("input", function () {
+        var n = Number(commInput.value);
+        state.commercial[key] = isNaN(n) ? 0 : n;
+        saveState();
+        renderTotals();
+      });
+      commTd.appendChild(commInput);
+      tr.appendChild(commTd);
+
+      var totalTd = document.createElement("td");
+      totalTd.className = "total tabnum";
+      totalTd.id = "total_" + key;
+      totalTd.setAttribute("data-label", "Total");
+      tr.appendChild(totalTd);
+
+      var parTd = document.createElement("td");
+      parTd.className = "derived nonzero";
+      parTd.id = "par_" + key;
+      parTd.setAttribute("data-label", "Par (2×)");
+      parTd.textContent = fmt(DEFAULT_PAR[key]);
+      tr.appendChild(parTd);
+
+      var statusTd = document.createElement("td");
+      statusTd.id = "status_" + key;
+      statusTd.setAttribute("data-label", "Status");
+      tr.appendChild(statusTd);
+
+      var orderTd = document.createElement("td");
+      orderTd.className = "par";
+      orderTd.setAttribute("data-label", "Order (dz)");
+      var orderInput = document.createElement("input");
+      orderInput.type = "number";
+      orderInput.min = "0";
+      orderInput.step = "0.5";
+      orderInput.id = "order_" + key;
+      var ov = state.order[key];
+      orderInput.value = ov === undefined || ov === null || ov === 0 ? "" : ov;
+      orderInput.addEventListener("input", function () {
+        var n = Number(orderInput.value);
+        state.order[key] = isNaN(n) ? 0 : n;
+        saveState();
+        renderTotals();
+      });
+      orderTd.appendChild(orderInput);
+      tr.appendChild(orderTd);
+
+      var newParTd = document.createElement("td");
+      newParTd.className = "total tabnum";
+      newParTd.id = "newpar_" + key;
+      newParTd.setAttribute("data-label", "New Par");
+      tr.appendChild(newParTd);
+
+      rowsEl.appendChild(tr);
+    });
+  }
+
+  function renderTotals() {
+    var packedTotals = sumSelected(selectedPacked);
+    var dirtyTotals = sumSelected(selectedDirty);
+
+    var grandInCabins = 0, grandPacked = 0, grandDirty = 0, grandStash = 0, grandUnopened = 0, grandTotal = 0, grandPar = 0, belowCount = 0, shortSum = 0, grandOrderDz = 0, grandNewPar = 0;
+
+    COLUMNS.forEach(function (c) {
+      var key = c[0];
+      var inCabins = ONE_PAR[key];
+      var packed = packedTotals[key];
+      var dirty = dirtyTotals[key];
+      var shelf = numVal("shelf_" + key);
+      var stash = numVal("stash_" + key);
+      var unopened = numVal("unopened_" + key);
+      var comm = numVal("comm_" + key);
+      var total = inCabins + packed + dirty + shelf + stash + unopened + comm;
+      var par = DEFAULT_PAR[key];
+
+      var packedTd = document.getElementById("packed_" + key);
+      packedTd.textContent = fmt(packed);
+      packedTd.classList.toggle("nonzero", packed > 0);
+
+      var dirtyTd = document.getElementById("dirty_" + key);
+      dirtyTd.textContent = fmt(dirty);
+      dirtyTd.classList.toggle("nonzero", dirty > 0);
+
+      document.getElementById("total_" + key).textContent = fmt(total);
+
+      var diff = total - par;
+      var statusTd = document.getElementById("status_" + key);
+      if (diff >= 0) {
+        statusTd.innerHTML = '<span class="pill good">+' + fmt(diff) + ' (' + toDoz(diff) + ' dz)</span>';
+      } else {
+        statusTd.innerHTML = '<span class="pill warn">&minus;' + fmt(-diff) + ' (' + toDoz(-diff) + ' dz)</span>';
+        belowCount++;
+        shortSum += -diff;
+      }
+
+      var orderDz = Number(state.order[key] || 0);
+      grandOrderDz += orderDz;
+
+      var newPar = par + orderDz * DOZEN;
+      document.getElementById("newpar_" + key).textContent = fmt(newPar);
+      grandNewPar += newPar;
+
+      grandInCabins += inCabins;
+      grandPacked += packed;
+      grandDirty += dirty;
+      grandStash += stash;
+      grandUnopened += unopened;
+      grandTotal += total;
+      grandPar += par;
+    });
+
+    footInCabins.textContent = fmt(grandInCabins);
+    footPacked.textContent = fmt(grandPacked);
+    footDirty.textContent = fmt(grandDirty);
+    footStash.textContent = fmt(grandStash);
+    footUnopened.textContent = fmt(grandUnopened);
+    footTotal.textContent = fmt(grandTotal);
+    footOrder.textContent = fmt(grandOrderDz);
+    footNewPar.textContent = fmt(grandNewPar);
+    footPar.textContent = fmt(grandPar);
+    statCount.textContent = fmt(COLUMNS.length);
+    statBelow.textContent = fmt(belowCount);
+    statOnHand.textContent = fmt(grandTotal);
+    statShort.innerHTML = fmt(shortSum) + '<small>&nbsp;pcs</small>';
+    statOrder.innerHTML = fmt(grandOrderDz) + '<small>&nbsp;dz</small>';
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    selectedPacked.clear();
+    selectedDirty.clear();
+    state.shelf = {};
+    state.commercial = {};
+    state.stash = {};
+    state.unopened = {};
+    state.order = {};
+    saveState();
+    packedPicker.refresh();
+    dirtyPicker.refresh();
+    renderRows();
+    renderTotals();
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var lines = [];
+    lines.push("PAR LEVEL SHORTAGE REPORT");
+    lines.push(new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" }));
+    lines.push("");
+    var packedTotals = sumSelected(selectedPacked);
+    var dirtyTotals = sumSelected(selectedDirty);
+    var any = false;
+    COLUMNS.forEach(function (c) {
+      var key = c[0], label = c[1];
+      var total = ONE_PAR[key] + packedTotals[key] + dirtyTotals[key] + Number(state.shelf[key] || 0) + Number(state.stash[key] || 0) + Number(state.unopened[key] || 0) + Number(state.commercial[key] || 0);
+      var par = DEFAULT_PAR[key];
+      var diff = total - par;
+      var orderDz = Number(state.order[key] || 0);
+      if (diff < 0 || orderDz > 0) {
+        any = true;
+        var line = "  " + label + ": " + total + " / " + par;
+        if (diff < 0) line += " (short " + (-diff) + " pcs / " + toDoz(-diff) + " dz)";
+        if (orderDz > 0) line += " — order " + orderDz + " dz (" + (orderDz * DOZEN) + " pcs)";
+        lines.push(line);
+      }
+    });
+    if (!any) lines.push("  Everything is at or above par.");
+    var text = lines.join("\n");
+    var btn = document.getElementById("copyBtn");
+    navigator.clipboard.writeText(text).then(function () {
+      var original = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function () { btn.textContent = original; }, 1400);
+    }).catch(function () {
+      btn.textContent = "Copy failed";
+      setTimeout(function () { btn.textContent = "Copy shortage report"; }, 1400);
+    });
+  });
+
+  renderRows();
+  renderTotals();
+})();
+</script>
+</body>
+</html>
