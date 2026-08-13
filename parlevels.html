@@ -388,6 +388,11 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
+  .mono-sub {
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 0.85em;
+  }
 
   .pill {
     display: inline-block;
@@ -1017,7 +1022,7 @@
       parTd.className = "derived nonzero";
       parTd.id = "par_" + key;
       parTd.setAttribute("data-label", "Par (2×)");
-      parTd.textContent = fmt(DEFAULT_PAR[key]);
+      parTd.innerHTML = '<span>' + fmt(DEFAULT_PAR[key]) + ' <span class="mono-sub">(' + toDoz(DEFAULT_PAR[key]) + ' dz)</span></span>';
       tr.appendChild(parTd);
 
       var statusTd = document.createElement("td");
@@ -1080,7 +1085,7 @@
       dirtyTd.textContent = fmt(dirty);
       dirtyTd.classList.toggle("nonzero", dirty > 0);
 
-      document.getElementById("total_" + key).textContent = fmt(total);
+      document.getElementById("total_" + key).innerHTML = '<span>' + fmt(total) + ' <span class="mono-sub">(' + toDoz(total) + ' dz)</span></span>';
 
       var diff = total - par;
       var statusTd = document.getElementById("status_" + key);
@@ -1096,7 +1101,7 @@
       grandOrderDz += orderDz;
 
       var newPar = par + orderDz * DOZEN;
-      document.getElementById("newpar_" + key).textContent = fmt(newPar);
+      document.getElementById("newpar_" + key).innerHTML = '<span>' + fmt(newPar) + ' <span class="mono-sub">(' + toDoz(newPar) + ' dz)</span></span>';
       grandNewPar += newPar;
 
       grandInCabins += inCabins;
@@ -1113,10 +1118,10 @@
     footDirty.textContent = fmt(grandDirty);
     footStash.textContent = fmt(grandStash);
     footUnopened.textContent = fmt(grandUnopened);
-    footTotal.textContent = fmt(grandTotal);
+    footTotal.innerHTML = '<span>' + fmt(grandTotal) + ' <span class="mono-sub">(' + toDoz(grandTotal) + ' dz)</span></span>';
     footOrder.textContent = fmt(grandOrderDz);
-    footNewPar.textContent = fmt(grandNewPar);
-    footPar.textContent = fmt(grandPar);
+    footNewPar.innerHTML = '<span>' + fmt(grandNewPar) + ' <span class="mono-sub">(' + toDoz(grandNewPar) + ' dz)</span></span>';
+    footPar.innerHTML = '<span>' + fmt(grandPar) + ' <span class="mono-sub">(' + toDoz(grandPar) + ' dz)</span></span>';
     statCount.textContent = fmt(COLUMNS.length);
     statBelow.textContent = fmt(belowCount);
     statOnHand.textContent = fmt(grandTotal);
