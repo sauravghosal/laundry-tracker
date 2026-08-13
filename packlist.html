@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pack List Builder</title>
+<style>
+  :root {
+    --bg: #f4f6f5;
+    --surface: #ffffff;
+    --surface-2: #e9edeb;
+    --surface-3: #dde3e0;
+    --border: #d3d9d6;
+    --text: #1b2422;
+    --text-muted: #5b6864;
+    --accent: #2e6f72;
+    --accent-strong: #1f5154;
+    --accent-wash: #dcebea;
+    --good: #3e7d4c;
+    --warn: #b8622a;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 4px 16px rgba(20, 30, 28, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12181a;
+      --surface: #1a2124;
+      --surface-2: #212a2d;
+      --surface-3: #293336;
+      --border: #313c3f;
+      --text: #e7eded;
+      --text-muted: #93a29e;
+      --accent: #5fb8b8;
+      --accent-strong: #7fcfcc;
+      --accent-wash: #1e3436;
+      --good: #6fcb84;
+      --warn: #e1934f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12181a; --surface: #1a2124; --surface-2: #212a2d; --surface-3: #293336;
+    --border: #313c3f; --text: #e7eded; --text-muted: #93a29e;
+    --accent: #5fb8b8; --accent-strong: #7fcfcc; --accent-wash: #1e3436;
+    --good: #6fcb84; --warn: #e1934f;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f4f6f5; --surface: #ffffff; --surface-2: #e9edeb; --surface-3: #dde3e0;
+    --border: #d3d9d6; --text: #1b2422; --text-muted: #5b6864;
+    --accent: #2e6f72; --accent-strong: #1f5154; --accent-wash: #dcebea;
+    --good: #3e7d4c; --warn: #b8622a;
+    --shadow: 0 1px 2px rgba(20, 30, 28, 0.06), 0 4px 16px rgba(20, 30, 28, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  .tabnum { font-variant-numeric: tabular-nums; }
+
+  a, button { font: inherit; color: inherit; }
+
+  /* ---------- Top nav ---------- */
+  nav.topnav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .topnav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 10px 24px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .topnav-link {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .topnav-link:hover { color: var(--accent-strong); }
+  .topnav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .topnav-link.active {
+    color: var(--accent-strong);
+    background: var(--accent-wash);
+    border-color: var(--border);
+  }
+
+  /* ---------- Header ---------- */
+  header.page {
+    padding: 28px 24px 20px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  h1 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 4px 0 6px;
+    text-wrap: balance;
+  }
+  .subhead {
+    color: var(--text-muted);
+    font-size: 14px;
+    max-width: 60ch;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 860px) {
+    .sidebar { position: static; max-height: none; }
+  }
+
+  .sidebar-controls {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13.5px;
+  }
+  input[type="search"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .chip-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
+  .chip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .filter-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--text-muted);
+  }
+  .filter-tab:hover { color: var(--text); }
+  .filter-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .filter-tab.active {
+    background: var(--surface);
+    color: var(--accent-strong);
+    font-weight: 600;
+    box-shadow: var(--shadow);
+  }
+
+  .prop-scroll {
+    overflow-y: auto;
+    padding: 6px 0 14px;
+  }
+
+  .group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 16px 6px;
+  }
+  .group-title {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .group-toggle {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 11.5px;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .group-toggle:hover { text-decoration: underline; }
+  .group-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .prop-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px;
+    cursor: pointer;
+  }
+  .prop-row:hover { background: var(--surface-2); }
+  .prop-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .prop-row input[type="checkbox"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .prop-name {
+    flex: 1;
+    font-size: 13.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .prop-weight {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .prop-row.checked .prop-name { color: var(--accent-strong); font-weight: 600; }
+
+  .no-results {
+    padding: 20px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* ---------- Main ---------- */
+  main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-label {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stat-value {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 26px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value.weight { color: var(--accent-strong); }
+  .stat small { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-left: 2px; }
+
+  .summary-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+  .empty-state {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .table-card h2 {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin: 0;
+    padding: 14px 18px 10px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .table-scroll { overflow-x: auto; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+  th, td {
+    padding: 8px 18px;
+    text-align: right;
+    font-size: 13.5px;
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { white-space: normal; word-break: break-word; }
+  th:last-child, td:last-child { width: 84px; }
+  @media (max-width: 420px) {
+    th, td { padding: 7px 10px; font-size: 13px; }
+    th:last-child, td:last-child { width: 64px; }
+  }
+  th:first-child, td:first-child { text-align: left; }
+  thead th {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:not(:last-child) td { border-bottom: 1px solid var(--surface-2); }
+  tbody tr:hover td { background: var(--surface-2); }
+  td.qty {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  td.qty.zero { color: var(--text-muted); opacity: 0.5; }
+  tfoot td {
+    font-weight: 700;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  footer.page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px 40px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .prop-row, .btn, .chip-btn { transition: background-color 0.12s ease, border-color 0.12s ease; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="topnav-link" href="inhouse.html">In House</a>
+    <a class="topnav-link" href="index.html">Commercial</a>
+    <a class="topnav-link active" href="packlist.html">Pack List</a>
+  </div>
+</nav>
+
+<header class="page">
+  <div class="eyebrow">Packing Manifest</div>
+  <h1>Linen &amp; Towel Pack List</h1>
+  <p class="subhead">Check off the properties on today's run. Totals and truck weight update as you go.</p>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-controls">
+      <input type="search" id="search" placeholder="Search properties…" autocomplete="off">
+      <div class="filter-tabs" role="tablist" aria-label="Filter by property type">
+        <button class="filter-tab active" type="button" data-filter="all">All</button>
+        <button class="filter-tab" type="button" data-filter="tinyhomes">Tiny Homes</button>
+        <button class="filter-tab" type="button" data-filter="cabins">Cabins</button>
+      </div>
+      <div class="quick-actions">
+        <button class="chip-btn" data-action="select-shown">Select shown</button>
+        <button class="chip-btn" data-action="clear-all">Clear all</button>
+      </div>
+    </div>
+    <div class="prop-scroll" id="propList"></div>
+  </aside>
+
+  <main>
+    <div class="summary" id="summary">
+      <div class="stat">
+        <div class="stat-label">Properties</div>
+        <div class="stat-value tabnum" id="statCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total pieces</div>
+        <div class="stat-value tabnum" id="statPieces">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Truck weight</div>
+        <div class="stat-value weight tabnum" id="statWeight">0<small>lb</small></div>
+      </div>
+      <div class="summary-actions">
+        <button class="btn" id="copyBtn">Copy list</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div id="results"></div>
+  </main>
+</div>
+
+<footer class="page">
+  Weights are per-property load totals supplied from the packing log, not per-item weights.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // key, label, section
+  var COLUMNS = [
+    ["kss", "King Sheet Set", "Sheets & Cases"],
+    ["qss", "Queen Sheet Set", "Sheets & Cases"],
+    ["tss", "Twin Sheet Set", "Sheets & Cases"],
+    ["spc", "Standard Pillowcase", "Sheets & Cases"],
+    ["bt",  "Bath Towel", "Bath"],
+    ["ht",  "Hand Towel", "Bath"],
+    ["pt",  "Pool Towel", "Bath"],
+    ["wc",  "Wash Cloth", "Bath"],
+    ["bm",  "Bath Mat", "Bath"],
+    ["kwc", "Kitchen Wash Cloth", "Kitchen"],
+    ["kt",  "Kitchen Towel", "Kitchen"],
+    ["om",  "Oven Mitt", "Kitchen"],
+    ["bwc", "Black Wash Cloth", "Kitchen"]
+  ];
+
+  var GROUPS = {
+    tinyhomes: "Tiny Homes — 1685 Newport Hwy",
+    cabins: "Cabins & Houses"
+  };
+  var GROUP_ORDER = ["tinyhomes", "cabins"];
+
+  function item(kss, qss, tss, spc, kpc, kfl, kf, qfl, qf, tfl, tf, bt, ht, pt, wc, bm, kwc, kt, om, bwc) {
+    return { kss:kss, qss:qss, tss:tss, spc:spc, kpc:kpc, kfl:kfl, kf:kf, qfl:qfl, qf:qf, tfl:tfl, tf:tf,
+             bt:bt, ht:ht, pt:pt, wc:wc, bm:bm, kwc:kwc, kt:kt, om:om, bwc:bwc };
+  }
+
+  var PROPERTIES = [
+    // Newport Hwy — Building 1
+    { id:"110", name:"110 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"111", name:"111 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"112", name:"112 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"113", name:"113 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"114", name:"114 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"115", name:"115 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"116", name:"116 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"117", name:"117 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"118", name:"118 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"119", name:"119 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"121", name:"121 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"122", name:"122 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"123", name:"123 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,2,2,1,1,5,1,0,5,1,1,1,0,1) },
+    { id:"124", name:"124 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"125", name:"125 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"126", name:"126 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,3,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"127", name:"127 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"128", name:"128 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"129", name:"129 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"130", name:"130 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"131", name:"131 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"132", name:"132 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"133", name:"133 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"134a", name:"134 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"135a", name:"135 - 1685 Newport Highway", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"136", name:"136 - 1685 Newport Hwy", group:"tinyhomes", weight:15, items:item(0,2,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    // Newport Hwy — Building 2
+    { id:"210", name:"210 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,6,0,0,0,3,3,0,0,6,1,0,6,1,1,1,0,1) },
+    { id:"211", name:"211 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"212", name:"212 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"213", name:"213 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"214", name:"214 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"215", name:"215 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"216", name:"216 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"217", name:"217 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"218", name:"218 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,0,0,4,0,0,0,2,2,0,0,4,1,0,4,1,1,1,0,1) },
+    { id:"134b", name:"134 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,3,3,0,1,5,1,0,5,1,1,1,0,1) },
+    { id:"135b", name:"135 - 1685 Newport Hwy", group:"tinyhomes", weight:20, items:item(0,2,1,6,0,0,0,3,3,0,1,5,1,0,5,1,1,1,0,1) },
+    // Cabins & Houses
+    { id:"rast1004", name:"1004 Rast Court", group:"cabins", weight:30, items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"pinyon1145", name:"1145 Pinyon Circle", group:"cabins", weight:40, items:item(1,2,1,6,2,1,1,2,2,1,1,14,3,0,11,3,1,1,1,3) },
+    { id:"pinyon1165", name:"1165 Pinyon Circle", group:"cabins", weight:230, items:item(6,6,12,36,12,6,6,6,6,12,12,72,14,0,60,12,3,3,2,12) },
+    { id:"bald1509", name:"1509 Bald Eagle", group:"cabins", weight:60, items:item(4,1,0,2,8,4,4,1,1,0,0,20,6,0,20,4,2,2,2,4) },
+    { id:"bald1510", name:"1510 Bald Eagle", group:"cabins", weight:30, items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"bald1512", name:"1512 Bald Eagle", group:"cabins", weight:30, items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"woodcock2228", name:"2228 Woodcock Trl", group:"cabins", weight:50, items:item(2,2,0,4,4,2,2,2,2,0,0,16,4,0,14,2,1,1,2,2) },
+    { id:"woodcock2236", name:"2236 Woodcock", group:"cabins", weight:60, items:item(3,3,0,6,6,3,3,3,3,0,0,20,6,0,17,3,2,2,2,3) },
+    { id:"umc2251", name:"2251 Upper Middle Creek #16", group:"cabins", weight:60, items:item(2,4,0,8,4,2,2,4,4,0,0,20,4,0,16,4,2,2,2,4) },
+    { id:"bluff2532", name:"2532 Bluff Mountain", group:"cabins", weight:60, items:item(3,1,1,4,6,3,3,1,1,1,1,20,5,0,17,3,2,2,2,3) },
+    { id:"bluff2540", name:"2540 Bluff Mountain", group:"cabins", weight:70, items:item(3,3,0,6,6,3,3,3,3,0,0,24,6,0,20,4,2,2,2,4) },
+    { id:"bluff2544", name:"2544 Bluff Mountain", group:"cabins", weight:70, items:item(5,2,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"bluff2550", name:"2550 Bluff Mountain", group:"cabins", weight:70, items:item(5,2,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"bluff2536", name:"2536 Bluff Mountain", group:"cabins", weight:70, items:item(0,0,0,4,10,5,5,2,2,0,0,24,8,0,19,5,2,2,2,5) },
+    { id:"rainbow615b", name:"615 Rainbow Road #2", group:"cabins", weight:30, items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"rainbow615c", name:"615 Rainbow Road #3", group:"cabins", weight:30, items:item(2,1,0,2,4,2,2,1,1,0,0,12,4,0,10,2,1,1,2,2) },
+    { id:"mtntop706", name:"706 Mountain Top", group:"cabins", weight:20, items:item(1,1,0,2,2,1,1,1,1,0,0,6,2,4,5,1,1,1,2,1) },
+    { id:"mtntop712", name:"712 Mountain Top", group:"cabins", weight:70, items:item(4,2,0,4,8,4,4,2,2,0,0,20,6,12,20,4,2,2,2,4) },
+    { id:"mtntop722", name:"722 Mountain Top", group:"cabins", weight:90, items:item(2,6,0,12,4,2,2,6,6,0,0,28,7,14,22,6,2,2,2,6) },
+    { id:"mtntop729", name:"729 Mountain Top", group:"cabins", weight:50, items:item(3,1,0,2,6,3,3,1,1,0,0,16,4,8,13,3,2,2,2,3) },
+    { id:"mtntop737", name:"737 Mountain Top", group:"cabins", weight:100, items:item(5,2,2,8,10,5,5,2,2,2,2,28,9,14,22,6,2,2,2,6) },
+    { id:"mtntop745", name:"745 Mountain Top", group:"cabins", weight:90, items:item(5,3,0,6,10,5,5,3,3,0,0,28,9,14,22,6,2,2,2,6) }
+  ];
+
+  var selected = new Set();
+  var activeFilter = "all";
+
+  var propListEl = document.getElementById("propList");
+  var searchEl = document.getElementById("search");
+  var resultsEl = document.getElementById("results");
+  var statCount = document.getElementById("statCount");
+  var statPieces = document.getElementById("statPieces");
+  var statWeight = document.getElementById("statWeight");
+
+  function fmt(n) { return n.toLocaleString("en-US"); }
+
+  function visibleProperties(filter) {
+    filter = (filter || "").trim().toLowerCase();
+    return PROPERTIES.filter(function (p) {
+      var matchesType = activeFilter === "all" || p.group === activeFilter;
+      var matchesSearch = !filter || p.name.toLowerCase().indexOf(filter) !== -1;
+      return matchesType && matchesSearch;
+    });
+  }
+
+  function renderSidebar(filter) {
+    filter = (filter || "").trim().toLowerCase();
+    propListEl.innerHTML = "";
+    var any = false;
+
+    GROUP_ORDER.forEach(function (gid) {
+      if (activeFilter !== "all" && activeFilter !== gid) return;
+      var rows = PROPERTIES.filter(function (p) {
+        return p.group === gid && (!filter || p.name.toLowerCase().indexOf(filter) !== -1);
+      });
+      if (rows.length === 0) return;
+      any = true;
+
+      var head = document.createElement("div");
+      head.className = "group-head";
+      var title = document.createElement("span");
+      title.className = "group-title";
+      title.textContent = GROUPS[gid] + " (" + rows.length + ")";
+      var toggle = document.createElement("button");
+      toggle.className = "group-toggle";
+      toggle.type = "button";
+      toggle.textContent = "toggle all";
+      toggle.addEventListener("click", function () {
+        var allChecked = rows.every(function (p) { return selected.has(p.id); });
+        rows.forEach(function (p) {
+          if (allChecked) selected.delete(p.id); else selected.add(p.id);
+        });
+        renderSidebar(searchEl.value);
+        renderResults();
+      });
+      head.appendChild(title);
+      head.appendChild(toggle);
+      propListEl.appendChild(head);
+
+      rows.forEach(function (p) {
+        var row = document.createElement("label");
+        row.className = "prop-row" + (selected.has(p.id) ? " checked" : "");
+        var cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = selected.has(p.id);
+        cb.addEventListener("change", function () {
+          if (cb.checked) selected.add(p.id); else selected.delete(p.id);
+          row.classList.toggle("checked", cb.checked);
+          renderResults();
+        });
+        var name = document.createElement("span");
+        name.className = "prop-name";
+        name.textContent = p.name;
+        var weight = document.createElement("span");
+        weight.className = "prop-weight tabnum";
+        weight.textContent = p.weight + " lb";
+        row.appendChild(cb);
+        row.appendChild(name);
+        row.appendChild(weight);
+        propListEl.appendChild(row);
+      });
+    });
+
+    if (!any) {
+      var empty = document.createElement("div");
+      empty.className = "no-results";
+      empty.textContent = filter
+        ? "No properties match “" + filter + "”."
+        : "No properties in this filter.";
+      propListEl.appendChild(empty);
+    }
+  }
+
+  function computeTotals() {
+    var chosen = PROPERTIES.filter(function (p) { return selected.has(p.id); });
+    var totals = {};
+    COLUMNS.forEach(function (c) { totals[c[0]] = 0; });
+    var weight = 0;
+    chosen.forEach(function (p) {
+      weight += p.weight;
+      COLUMNS.forEach(function (c) { totals[c[0]] += p.items[c[0]]; });
+    });
+    var pieces = COLUMNS.reduce(function (sum, c) { return sum + totals[c[0]]; }, 0);
+    return { chosen: chosen, totals: totals, weight: weight, pieces: pieces };
+  }
+
+  function renderResults() {
+    var data = computeTotals();
+    statCount.textContent = fmt(data.chosen.length);
+    statPieces.textContent = fmt(data.pieces);
+    statWeight.innerHTML = fmt(data.weight) + "<small>lb</small>";
+
+    if (data.chosen.length === 0) {
+      resultsEl.innerHTML = '<div class="empty-state">Select properties on the left to build today’s pack list.</div>';
+      return;
+    }
+
+    var sections = ["Sheets & Cases", "Bath", "Kitchen"];
+    var html = '<div class="table-card"><div class="table-scroll"><table>';
+    html += "<thead><tr><th>Item</th><th>Total</th></tr></thead>";
+    sections.forEach(function (section) {
+      var cols = COLUMNS.filter(function (c) { return c[2] === section; });
+      html += '<tbody><tr><td colspan="2" style="background:var(--surface-2);font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);font-weight:600;">' + section + "</td></tr>";
+      cols.forEach(function (c) {
+        var v = data.totals[c[0]];
+        html += "<tr><td>" + c[1] + '</td><td class="qty' + (v === 0 ? " zero" : "") + '">' + (v === 0 ? "—" : fmt(v)) + "</td></tr>";
+      });
+      html += "</tbody>";
+    });
+    html += '<tfoot><tr><td>Total pieces</td><td class="tabnum">' + fmt(data.pieces) + "</td></tr></tfoot>";
+    html += "</table></div></div>";
+    resultsEl.innerHTML = html;
+  }
+
+  document.querySelectorAll(".chip-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var action = btn.getAttribute("data-action");
+      if (action === "select-shown") {
+        visibleProperties(searchEl.value).forEach(function (p) { selected.add(p.id); });
+      } else if (action === "clear-all") {
+        selected.clear();
+      }
+      renderSidebar(searchEl.value);
+      renderResults();
+    });
+  });
+
+  document.querySelectorAll(".filter-tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      activeFilter = tab.getAttribute("data-filter");
+      document.querySelectorAll(".filter-tab").forEach(function (t) {
+        t.classList.toggle("active", t === tab);
+      });
+      renderSidebar(searchEl.value);
+    });
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    selected.clear();
+    renderSidebar(searchEl.value);
+    renderResults();
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var data = computeTotals();
+    var lines = [];
+    lines.push("PACKING MANIFEST");
+    lines.push(data.chosen.length + " properties — " + fmt(data.weight) + " lb");
+    lines.push("");
+    lines.push("Properties:");
+    data.chosen.forEach(function (p) { lines.push("  • " + p.name); });
+    lines.push("");
+    lines.push("Totals:");
+    COLUMNS.forEach(function (c) {
+      var v = data.totals[c[0]];
+      if (v > 0) lines.push("  " + c[1] + ": " + v);
+    });
+    var text = lines.join("\n");
+    var btn = document.getElementById("copyBtn");
+    navigator.clipboard.writeText(text).then(function () {
+      var original = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function () { btn.textContent = original; }, 1400);
+    }).catch(function () {
+      btn.textContent = "Copy failed";
+      setTimeout(function () { btn.textContent = "Copy list"; }, 1400);
+    });
+  });
+
+  searchEl.addEventListener("input", function () { renderSidebar(searchEl.value); });
+
+  renderSidebar("");
+  renderResults();
+})();
+</script>
+</body>
+</html>
