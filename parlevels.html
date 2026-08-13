@@ -338,7 +338,7 @@
     background: var(--surface-2);
   }
   .table-scroll { overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; min-width: 1200px; }
+  table { border-collapse: collapse; width: 100%; min-width: 1120px; }
   th, td { padding: 6px 10px; text-align: right; font-size: 13px; white-space: nowrap; }
   th:first-child, td:first-child {
     text-align: left;
@@ -574,7 +574,7 @@
 
   <div class="table-card">
     <h2>Linen Inventory vs. Par</h2>
-    <div class="section-note"><b>In Cabins (1&times;)</b> is fixed at each item's 1&times; property total, since every cabin is assumed clean &amp; stocked — it's counted toward the total automatically and isn't editable. <b>Packed</b> and <b>Dirty Returns</b> are set by the cabin pickers above — check/uncheck cabins to change them. <b>Clean Shelf</b>, <b>Secret Stash</b>, and <b>Unopened</b> are entered by hand. <b>Dirty Sorted</b> is dirty linen already sorted and coming back from commercial — bag counts aren't exact, so enter your best estimate per item. <b>Par (2&times;)</b> is fixed at double the property totals and isn't editable. <b>Order (dz)</b> starts at 0 — enter how many dozens you're ordering. <b>New Par</b> is a live preview of Par + Order — what your par target would become if you placed that order and adopted it as the new baseline.</div>
+    <div class="section-note"><b>In Cabins (1&times;)</b> is fixed at each item's 1&times; property total, since every cabin is assumed clean &amp; stocked — it's counted toward the total automatically and isn't editable. <b>Packed</b> and <b>Dirty Returns</b> are set by the cabin pickers above — check/uncheck cabins to change them. <b>Clean Shelf</b>, <b>Secret Stash</b>, and <b>Unopened</b> are entered by hand. <b>Dirty Sorted</b> is dirty linen already sorted and coming back from commercial — bag counts aren't exact, so enter your best estimate per item. Par (2&times; the property totals) still drives Status behind the scenes but isn't shown as its own column. <b>Order (dz)</b> starts at 0 — enter how many dozens you're ordering. <b>New Par</b> is (Total + Order) &divide; 1&times; par (the property total) — how many pars you'd be carrying if that order came in; 2.00&times; means you'd be fully stocked to the 2&times; target.</div>
     <div class="table-scroll">
       <table>
         <thead>
@@ -588,7 +588,6 @@
             <th>Unopened</th>
             <th>Dirty Sorted</th>
             <th>Total</th>
-            <th>Par (2&times;)</th>
             <th>Status</th>
             <th>Order (dz)</th>
             <th>New Par</th>
@@ -606,7 +605,6 @@
             <td class="tabnum" id="footUnopened" data-label="Unopened">0</td>
             <td></td>
             <td class="tabnum" id="footTotal" data-label="Total">0</td>
-            <td class="tabnum" id="footPar" data-label="Par (2×)">0</td>
             <td></td>
             <td class="tabnum" id="footOrder" data-label="Order (dz)">0</td>
             <td class="tabnum" id="footNewPar" data-label="New Par">0</td>
@@ -899,7 +897,6 @@
   var footStash = document.getElementById("footStash");
   var footUnopened = document.getElementById("footUnopened");
   var footTotal = document.getElementById("footTotal");
-  var footPar = document.getElementById("footPar");
   var footOrder = document.getElementById("footOrder");
   var footNewPar = document.getElementById("footNewPar");
   var statCount = document.getElementById("statCount");
@@ -1018,13 +1015,6 @@
       totalTd.setAttribute("data-label", "Total");
       tr.appendChild(totalTd);
 
-      var parTd = document.createElement("td");
-      parTd.className = "derived nonzero";
-      parTd.id = "par_" + key;
-      parTd.setAttribute("data-label", "Par (2×)");
-      parTd.innerHTML = '<span>' + fmt(DEFAULT_PAR[key]) + ' <span class="mono-sub">(' + toDoz(DEFAULT_PAR[key]) + ' dz)</span></span>';
-      tr.appendChild(parTd);
-
       var statusTd = document.createElement("td");
       statusTd.id = "status_" + key;
       statusTd.setAttribute("data-label", "Status");
@@ -1063,7 +1053,7 @@
     var packedTotals = sumSelected(selectedPacked);
     var dirtyTotals = sumSelected(selectedDirty);
 
-    var grandInCabins = 0, grandPacked = 0, grandDirty = 0, grandStash = 0, grandUnopened = 0, grandTotal = 0, grandPar = 0, belowCount = 0, shortSum = 0, grandOrderDz = 0, grandNewPar = 0;
+    var grandInCabins = 0, grandPacked = 0, grandDirty = 0, grandStash = 0, grandUnopened = 0, grandTotal = 0, grandPar = 0, grandOnePar = 0, belowCount = 0, shortSum = 0, grandOrderDz = 0;
 
     COLUMNS.forEach(function (c) {
       var key = c[0];
@@ -1076,6 +1066,7 @@
       var comm = numVal("comm_" + key);
       var total = inCabins + packed + dirty + shelf + stash + unopened + comm;
       var par = DEFAULT_PAR[key];
+      var onePar = ONE_PAR[key];
 
       var packedTd = document.getElementById("packed_" + key);
       packedTd.textContent = fmt(packed);
@@ -1100,9 +1091,8 @@
       var orderDz = Number(state.order[key] || 0);
       grandOrderDz += orderDz;
 
-      var newPar = par + orderDz * DOZEN;
-      document.getElementById("newpar_" + key).innerHTML = '<span>' + fmt(newPar) + ' <span class="mono-sub">(' + toDoz(newPar) + ' dz)</span></span>';
-      grandNewPar += newPar;
+      var newParRatio = onePar > 0 ? (total + orderDz * DOZEN) / onePar : 0;
+      document.getElementById("newpar_" + key).textContent = newParRatio.toFixed(2) + "×";
 
       grandInCabins += inCabins;
       grandPacked += packed;
@@ -1111,6 +1101,7 @@
       grandUnopened += unopened;
       grandTotal += total;
       grandPar += par;
+      grandOnePar += onePar;
     });
 
     footInCabins.textContent = fmt(grandInCabins);
@@ -1120,8 +1111,8 @@
     footUnopened.textContent = fmt(grandUnopened);
     footTotal.innerHTML = '<span>' + fmt(grandTotal) + ' <span class="mono-sub">(' + toDoz(grandTotal) + ' dz)</span></span>';
     footOrder.textContent = fmt(grandOrderDz);
-    footNewPar.innerHTML = '<span>' + fmt(grandNewPar) + ' <span class="mono-sub">(' + toDoz(grandNewPar) + ' dz)</span></span>';
-    footPar.innerHTML = '<span>' + fmt(grandPar) + ' <span class="mono-sub">(' + toDoz(grandPar) + ' dz)</span></span>';
+    var grandNewParRatio = grandOnePar > 0 ? (grandTotal + grandOrderDz * DOZEN) / grandOnePar : 0;
+    footNewPar.textContent = grandNewParRatio.toFixed(2) + "×";
     statCount.textContent = fmt(COLUMNS.length);
     statBelow.textContent = fmt(belowCount);
     statOnHand.textContent = fmt(grandTotal);
