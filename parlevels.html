@@ -523,6 +523,7 @@
       <div class="stat-value tabnum" id="statOrder">0<small>&nbsp;dz</small></div>
     </div>
     <div class="summary-actions">
+      <button class="btn" id="exportBtn" type="button">Export to Excel</button>
       <button class="btn" id="copyBtn" type="button">Copy shortage report</button>
       <button class="btn" id="resetBtn" type="button">Reset all</button>
     </div>
@@ -1133,6 +1134,75 @@
     dirtyPicker.refresh();
     renderRows();
     renderTotals();
+  });
+
+  function csvCell(value) {
+    var s = String(value);
+    if (/[",\r\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    var packedTotals = sumSelected(selectedPacked);
+    var dirtyTotals = sumSelected(selectedDirty);
+
+    var headers = [
+      "Item", "In Cabins (1x)", "Packed", "Dirty Returns", "Clean Shelf",
+      "Secret Stash", "Unopened", "Dirty Sorted", "Total", "Total (dz)",
+      "Status (+/- pcs)", "Status (dz)", "Order (dz)", "New Par (x)"
+    ];
+    var rows = [headers];
+
+    var grand = { inCabins: 0, packed: 0, dirty: 0, shelf: 0, stash: 0, unopened: 0, comm: 0, total: 0 };
+
+    COLUMNS.forEach(function (c) {
+      var key = c[0], label = c[1];
+      var inCabins = ONE_PAR[key];
+      var packed = packedTotals[key];
+      var dirty = dirtyTotals[key];
+      var shelf = numVal("shelf_" + key);
+      var stash = numVal("stash_" + key);
+      var unopened = numVal("unopened_" + key);
+      var comm = numVal("comm_" + key);
+      var total = inCabins + packed + dirty + shelf + stash + unopened + comm;
+      var par = DEFAULT_PAR[key];
+      var onePar = ONE_PAR[key];
+      var diff = total - par;
+      var orderDz = Number(state.order[key] || 0);
+      var newParRatio = onePar > 0 ? (total + orderDz * DOZEN) / onePar : 0;
+
+      rows.push([
+        label, inCabins, packed, dirty, shelf, stash, unopened, comm,
+        total, toDoz(total), diff, toDoz(diff), orderDz, newParRatio.toFixed(2) + "x"
+      ]);
+
+      grand.inCabins += inCabins;
+      grand.packed += packed;
+      grand.dirty += dirty;
+      grand.shelf += shelf;
+      grand.stash += stash;
+      grand.unopened += unopened;
+      grand.comm += comm;
+      grand.total += total;
+    });
+
+    rows.push([
+      "All items", grand.inCabins, grand.packed, grand.dirty, grand.shelf,
+      grand.stash, grand.unopened, grand.comm, grand.total, toDoz(grand.total),
+      "", "", "", ""
+    ]);
+
+    var csv = "﻿" + rows.map(function (r) { return r.map(csvCell).join(","); }).join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var dateStr = new Date().toISOString().split("T")[0];
+    a.href = url;
+    a.download = "par-levels-" + dateStr + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   document.getElementById("copyBtn").addEventListener("click", function () {
