@@ -162,6 +162,7 @@
   }
   @media (max-width: 860px) {
     .sidebar { position: static; max-height: none; }
+    .prop-scroll { max-height: 46vh; }
   }
 
   .sidebar-controls {
@@ -201,6 +202,32 @@
   }
   .chip-btn:hover { border-color: var(--accent); color: var(--accent-strong); }
   .chip-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip-btn.selected-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+  }
+  .chip-btn.selected-toggle .count-badge {
+    background: var(--surface-3);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+  .chip-btn.selected-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .chip-btn.selected-toggle.active .count-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  @media (max-width: 860px) {
+    .chip-btn { padding: 8px 13px; font-size: 13px; }
+  }
 
   .filter-tabs {
     display: flex;
@@ -288,7 +315,15 @@
     color: var(--text-muted);
     flex-shrink: 0;
   }
+  .prop-row.checked { background: var(--accent-wash); }
   .prop-row.checked .prop-name { color: var(--accent-strong); font-weight: 600; }
+  @media (max-width: 860px) {
+    .prop-row { padding: 11px 16px; gap: 12px; }
+    .prop-row input[type="checkbox"] { width: 20px; height: 20px; }
+    .prop-name { font-size: 14.5px; white-space: normal; }
+    .filter-tab { padding: 9px 8px; font-size: 13px; }
+    input[type="search"] { padding: 10px 12px; font-size: 15px; }
+  }
 
   .no-results {
     padding: 20px 16px;
@@ -349,6 +384,11 @@
     font-weight: 600;
   }
   .btn.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  @media (max-width: 860px) {
+    .summary { padding: 14px 16px; gap: 16px 24px; }
+    .summary-actions { margin-left: 0; width: 100%; }
+    .summary-actions .btn { flex: 1; padding: 10px 14px; }
+  }
 
   .empty-state {
     background: var(--surface);
@@ -458,6 +498,9 @@
         <button class="filter-tab" type="button" data-filter="cabins">Cabins</button>
       </div>
       <div class="quick-actions">
+        <button class="chip-btn selected-toggle" id="selectedToggleBtn" type="button" aria-pressed="false">
+          Selected <span class="count-badge tabnum" id="selectedCount">0</span>
+        </button>
         <button class="chip-btn" data-action="select-shown">Select shown</button>
         <button class="chip-btn" data-action="clear-all">Clear all</button>
       </div>
@@ -592,6 +635,7 @@
 
   var selected = new Set();
   var activeFilter = "all";
+  var showSelectedOnly = false;
 
   var propListEl = document.getElementById("propList");
   var searchEl = document.getElementById("search");
@@ -599,6 +643,8 @@
   var statCount = document.getElementById("statCount");
   var statPieces = document.getElementById("statPieces");
   var statWeight = document.getElementById("statWeight");
+  var selectedToggleBtn = document.getElementById("selectedToggleBtn");
+  var selectedCountEl = document.getElementById("selectedCount");
 
   function fmt(n) { return n.toLocaleString("en-US"); }
 
@@ -616,10 +662,16 @@
     propListEl.innerHTML = "";
     var any = false;
 
+    selectedCountEl.textContent = fmt(selected.size);
+    selectedToggleBtn.classList.toggle("active", showSelectedOnly);
+    selectedToggleBtn.setAttribute("aria-pressed", String(showSelectedOnly));
+
     GROUP_ORDER.forEach(function (gid) {
       if (activeFilter !== "all" && activeFilter !== gid) return;
       var rows = PROPERTIES.filter(function (p) {
-        return p.group === gid && (!filter || p.name.toLowerCase().indexOf(filter) !== -1);
+        var matchesSearch = !filter || p.name.toLowerCase().indexOf(filter) !== -1;
+        var matchesSelected = !showSelectedOnly || selected.has(p.id);
+        return p.group === gid && matchesSearch && matchesSelected;
       });
       if (rows.length === 0) return;
       any = true;
@@ -654,6 +706,11 @@
         cb.addEventListener("change", function () {
           if (cb.checked) selected.add(p.id); else selected.delete(p.id);
           row.classList.toggle("checked", cb.checked);
+          if (showSelectedOnly) {
+            renderSidebar(searchEl.value);
+          } else {
+            selectedCountEl.textContent = fmt(selected.size);
+          }
           renderResults();
         });
         var name = document.createElement("span");
@@ -672,9 +729,13 @@
     if (!any) {
       var empty = document.createElement("div");
       empty.className = "no-results";
-      empty.textContent = filter
-        ? "No properties match “" + filter + "”."
-        : "No properties in this filter.";
+      if (showSelectedOnly) {
+        empty.textContent = "No properties selected yet.";
+      } else if (filter) {
+        empty.textContent = "No properties match “" + filter + "”.";
+      } else {
+        empty.textContent = "No properties in this filter.";
+      }
       propListEl.appendChild(empty);
     }
   }
@@ -731,6 +792,11 @@
       renderSidebar(searchEl.value);
       renderResults();
     });
+  });
+
+  selectedToggleBtn.addEventListener("click", function () {
+    showSelectedOnly = !showSelectedOnly;
+    renderSidebar(searchEl.value);
   });
 
   document.querySelectorAll(".filter-tab").forEach(function (tab) {
