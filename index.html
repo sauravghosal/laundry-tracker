@@ -352,8 +352,6 @@
 (function () {
   "use strict";
 
-  var LAUNDRY_TYPE = "Commercial";
-
   var RATE = 17;
   var TARGET = 0.15;
 
@@ -399,12 +397,14 @@
     // Submissions before 9am count toward the prior day's log.
     var due = new Date();
     if (due.getHours() < 9) due.setDate(due.getDate() - 1);
-    var dueDate = due.toISOString().split("T")[0];
+    var dueDate = due.getFullYear() + "-" +
+      String(due.getMonth() + 1).padStart(2, "0") + "-" +
+      String(due.getDate()).padStart(2, "0");
 
     var dateObj = new Date(due.getFullYear(), due.getMonth(), due.getDate());
     var year = dateObj.getFullYear();
     var firstJan = new Date(year, 0, 1);
-    var days = Math.floor((dateObj - firstJan) / 86400000);
+    var days = Math.floor((Date.UTC(year, due.getMonth(), due.getDate()) - Date.UTC(year, 0, 1)) / 86400000);
     var week = Math.ceil((days + firstJan.getDay() + 1) / 7);
 
     var saveStatus = document.getElementById("saveStatus");
@@ -415,21 +415,13 @@
     var response = await fetch("https://hooks.zapier.com/hooks/catch/15804429/4yw9dy5/", {
       method: "POST",
       body: JSON.stringify({
-        laundryType: LAUNDRY_TYPE,
-        weightMode: "cabins",
-        cabins: selectedCabins,
-        cabinWeight: cabinWeight,
-        laborCost: cost,
-        dayOfWeek: dateObj.toLocaleDateString(undefined, { weekday: "long" }),
-        yearWeek: year + "" + week,
-        dueDate: dueDate,
-        staff: document.getElementById("staff").value,
-        specialLbs: specialLbs,
-        totalWeight: totalWeight,
-        hours: hours,
-        lbsPerHour: lbsPerHour,
-        costPerLb: costPerLb,
-        notes: document.getElementById("notes").value
+        "Day of the Week": dateObj.toLocaleDateString("en-US", { weekday: "long" }),
+        "Year & Weeknum": year + "" + week,
+        "Due Date": dueDate,
+        "Attendant Name": document.getElementById("staff").value,
+        "Properties Packed": selectedCabins.map(function (cabin) { return cabin.name; }).join(", "),
+        "Cost per Pound": costPerLb,
+        "Notes": document.getElementById("notes").value
       })
     });
     if (!response.ok) throw new Error("Save failed");
