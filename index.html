@@ -264,13 +264,13 @@
     input, select, button { transition: background-color 0.12s ease, border-color 0.12s ease; }
   }
 </style>
+<link rel="stylesheet" href="tracker.css">
 </head>
 
 <body>
 
 <nav class="topnav">
   <div class="topnav-inner">
-    <a class="topnav-link" href="inhouse.html">In House</a>
     <a class="topnav-link active" href="index.html">Commercial</a>
     <a class="topnav-link" href="packlist.html">Pack List</a>
     <a class="topnav-link" href="parlevels.html">Par Levels</a>
@@ -286,10 +286,10 @@
 <div class="layout">
   <form id="form">
     <div class="card">
-      <h3>Staff</h3>
+      <h3>01 / Your shift</h3>
+      <label class="label" for="staff">Staff member</label>
       <select id="staff" required>
         <option value="">Select Staff</option>
-        <option value="Daniel Gunter">Daniel Gunter</option>
         <option value="Shayla England">Shayla England</option>
         <option value="Mikayla Ellison">Mikayla Ellison</option>
         <option value="Autumn Stupplebeen">Autumn Stupplebeen</option>
@@ -299,119 +299,63 @@
     <div class="card" style="margin-top:16px;">
       <h3>Time</h3>
       <div class="input-group">
-        <div class="label">Total Hours Worked</div>
-        <input type="number" id="hoursWorked" step="0.1" value="6" placeholder="e.g. 6" required>
+        <label class="label" for="hoursWorked">Total Hours Worked</label>
+          <input type="number" id="hoursWorked" min="0.1" step="0.1" value="6" placeholder="e.g. 6" required>
       </div>
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <h3>Linen Counts</h3>
-      <div class="grid">
-        <div class="input-group">
-          <div class="label">Standard Pillowcase</div>
-          <input id="SPC" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">King Pillowcase</div>
-          <input id="KPC" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">King Flat</div>
-          <input id="KFl" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">King Fitted</div>
-          <input id="Kf" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Queen Flat</div>
-          <input id="QFl" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Queen Fitted</div>
-          <input id="Qf" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Twin Flat</div>
-          <input id="TFl" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Twin Fitted</div>
-          <input id="Tf" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Bath Towel</div>
-          <input id="T" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Hand Towel</div>
-          <input id="HT" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Pool Towel</div>
-          <input id="PT" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Wash Cloth</div>
-          <input id="WC" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Bath Mat</div>
-          <input id="BM" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Kitchen Towel</div>
-          <input id="KT" type="number">
-        </div>
-        <div class="input-group">
-          <div class="label">Kitchen Wash Cloth</div>
-          <input id="KWC" type="number">
-        </div>
-      </div>
+      <h3>02 / Laundry completed</h3>
+      <section id="cabinSection" aria-label="Cabin selection">
+        <p class="helper">Select each cabin whose laundry you completed this shift. Pounds are based on the supplied cabin weights.</p>
+        <label class="label" for="cabinSearch">Find a cabin</label>
+        <input id="cabinSearch" type="search" placeholder="Search name or address…">
+        <div id="cabinList" class="cabin-list"></div>
+        <p id="noCabins" class="helper" hidden>No cabins match your search.</p>
+        <div class="selection-summary"><span id="cabinCount">0 cabins selected</span><strong id="cabinPounds">0 lbs</strong></div>
+        <button type="button" class="secondary" id="clearCabins">Clear selections</button>
+      </section>
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <h3>Specialty Linen</h3>
+      <h3>Additional laundry</h3>
       <div class="input-group">
-        <div class="label">Total Weight (lbs)</div>
-        <input id="specialLbs" type="number" step="0.1" placeholder="e.g. 25">
+        <label class="label" for="specialLbs">Extra weight (lbs), not included above</label>
+        <input id="specialLbs" type="number" min="0" step="0.1" placeholder="e.g. 25">
       </div>
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <h3>Notes</h3>
+      <h3>03 / Shift notes</h3>
       <div class="input-group">
-        <div class="label">Notes / Other Tasks Completed</div>
-        <input id="notes" type="text" placeholder="Include any additional tasks or issues that may have reduced laundry output...">
+        <label class="label" for="notes">Notes / Other Tasks Completed</label>
+          <input id="notes" type="text" placeholder="Include any additional tasks or issues that may have reduced laundry output...">
       </div>
     </div>
 
     <div class="card" style="margin-top:16px;">
-      <button type="submit">Calculate</button>
+      <button type="submit" id="submitButton">Calculate &amp; save shift</button>
+      <p id="saveStatus" class="helper" role="status"></p>
     </div>
   </form>
 
-  <div class="card">
-    <h3>Performance</h3>
-    <div class="calc-note">Weight calculated per item type. Cost = hours &times; $17. Target &le; $0.20/lb.</div>
-    <div class="results" id="results"></div>
+  <div class="card performance">
+    <h3>Shift overview</h3>
+    <div class="calc-note">Selected cabin pounds + extra laundry. Cost = hours &times; $17. Target &le; $0.15/lb.</div>
+    <p class="helper" id="emptyResults">Select cabins and enter your hours to see your productivity.</p>
+    <div class="results" id="results" aria-live="polite"></div>
   </div>
 </div>
 
+<script src="cabins.js"></script>
 <script>
 (function () {
   "use strict";
 
   var LAUNDRY_TYPE = "Commercial";
 
-  var weights = {
-    SPC: 0.21, KPC: 0.27, KFl: 1.63, Kf: 1.52, QFl: 1.31, Qf: 1.31,
-    TFl: 1.01, Tf: 0.78, T: 1.17, HT: 0.33, PT: 1.08, WC: 0.08,
-    BM: 0.58, KT: 0.33, KWC: 0.08
-  };
-
   var RATE = 17;
-  var TARGET = 0.2;
+  var TARGET = 0.15;
 
   var now = new Date();
   document.getElementById("todayDate").textContent = now.toLocaleDateString(undefined, {
@@ -421,17 +365,19 @@
   document.getElementById("form").addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    var totalWeight = 0;
-    Object.keys(weights).forEach(function (key) {
-      var el = document.getElementById(key);
-      var val = el ? Number(el.value) : 0;
-      totalWeight += (val || 0) * weights[key];
-    });
+    var selectedCabins = getSelectedCabins();
+    var cabinWeight = selectedCabins.reduce(function (sum, cabin) { return sum + cabin.pounds; }, 0);
+    var totalWeight = cabinWeight;
 
     var specialLbs = Number(document.getElementById("specialLbs").value || 0);
     totalWeight += specialLbs;
 
     var hours = Number(document.getElementById("hoursWorked").value) || 0;
+    if (totalWeight <= 0 || hours <= 0 || !Number.isFinite(totalWeight) || !Number.isFinite(hours)) {
+      document.getElementById("saveStatus").textContent = "Enter positive hours and select cabins or add extra weight.";
+      return;
+    }
+    document.getElementById("emptyResults").hidden = true;
     var cost = hours * RATE;
     var costPerLb = totalWeight > 0 ? cost / totalWeight : 0;
     var lbsPerHour = hours > 0 ? totalWeight / hours : 0;
@@ -447,7 +393,7 @@
       '<div class="metric"><div class="value tabnum">$' + costPerLb.toFixed(2) + '</div><div class="metric-label">Cost / lb</div></div>' +
       '<div class="metric"><div class="value tabnum">' + lbsPerHour.toFixed(1) + '</div><div class="metric-label">lbs / hr</div></div>' +
       '<div class="status ' + (isOnTarget ? "good" : "bad") + '">' +
-        (totalWeight === 0 ? "Enter linen counts" : isOnTarget ? "ON TARGET ✅" : "OFF TARGET ❌") +
+        (isOnTarget ? "ON TARGET ✅" : "OFF TARGET ❌") +
       '</div>';
 
     // Submissions before 9am count toward the prior day's log.
@@ -461,29 +407,23 @@
     var days = Math.floor((dateObj - firstJan) / 86400000);
     var week = Math.ceil((days + firstJan.getDay() + 1) / 7);
 
-    await fetch("https://hooks.zapier.com/hooks/catch/15804429/4yw9dy5/", {
+    var saveStatus = document.getElementById("saveStatus");
+    var submitButton = document.getElementById("submitButton");
+    submitButton.disabled = true;
+    saveStatus.textContent = "Saving shift…";
+    try {
+    var response = await fetch("https://hooks.zapier.com/hooks/catch/15804429/4yw9dy5/", {
       method: "POST",
       body: JSON.stringify({
         laundryType: LAUNDRY_TYPE,
+        weightMode: "cabins",
+        cabins: selectedCabins,
+        cabinWeight: cabinWeight,
+        laborCost: cost,
         dayOfWeek: dateObj.toLocaleDateString(undefined, { weekday: "long" }),
         yearWeek: year + "" + week,
         dueDate: dueDate,
         staff: document.getElementById("staff").value,
-        SPC: Number(document.getElementById("SPC").value || 0),
-        KPC: Number(document.getElementById("KPC").value || 0),
-        KFl: Number(document.getElementById("KFl").value || 0),
-        Kf: Number(document.getElementById("Kf").value || 0),
-        QFl: Number(document.getElementById("QFl").value || 0),
-        Qf: Number(document.getElementById("Qf").value || 0),
-        TFl: Number(document.getElementById("TFl").value || 0),
-        Tf: Number(document.getElementById("Tf").value || 0),
-        T: Number(document.getElementById("T").value || 0),
-        HT: Number(document.getElementById("HT").value || 0),
-        PT: Number(document.getElementById("PT").value || 0),
-        WC: Number(document.getElementById("WC").value || 0),
-        BM: Number(document.getElementById("BM").value || 0),
-        KT: Number(document.getElementById("KT").value || 0),
-        KWC: Number(document.getElementById("KWC").value || 0),
         specialLbs: specialLbs,
         totalWeight: totalWeight,
         hours: hours,
@@ -492,6 +432,13 @@
         notes: document.getElementById("notes").value
       })
     });
+    if (!response.ok) throw new Error("Save failed");
+    saveStatus.textContent = "Shift saved successfully.";
+    } catch (error) {
+      saveStatus.textContent = "Your calculation is ready, but the shift could not be saved. Please try again.";
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 })();
 </script>

@@ -1,0 +1,45 @@
+/* Shared productivity tracker layout, using the existing light/dark palette. */
+.topnav-inner, header.page, .layout { max-width: 1120px; }
+.topnav-inner { padding-top: 16px; padding-bottom: 16px; }
+header.page { padding-top: 44px; padding-bottom: 24px; }
+h1 { font-family: inherit; font-size: clamp(28px, 4vw, 40px); font-weight: 750; letter-spacing: -.04em; }
+.subhead { margin: 10px 0 0; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, 1fr); align-items: start; gap: 24px; }
+.card { border-radius: 16px; padding: 24px; }
+.card h3 { color: var(--accent-strong); letter-spacing: .1em; margin-bottom: 18px; }
+.performance { position: sticky; top: 24px; border-top: 4px solid var(--accent); }
+.helper { font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+input, select { min-height: 46px; background: var(--surface); border-radius: 9px; }
+.label { display: block; font-size: 13px; font-weight: 500; }
+.cabin-list { display: grid; gap: 8px; max-height: 390px; overflow-y: auto; margin-top: 16px; padding: 2px; }
+.cabin-option { display: flex; gap: 12px; align-items: center; border: 1px solid var(--border); border-radius: 10px; padding: 12px; cursor: pointer; font-size: 14px; }
+.cabin-option:hover { background: var(--surface-2); }
+.cabin-option:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
+.cabin-option input { width: 18px; height: 18px; min-height: 18px; margin: 0; flex: 0 0 18px; accent-color: var(--accent); }
+.cabin-option span { flex: 1; }
+.cabin-option strong { color: var(--accent-strong); white-space: nowrap; font-size: 13px; font-variant-numeric: tabular-nums; }
+.selection-summary { display: flex; justify-content: space-between; gap: 12px; background: var(--accent-wash); border-radius: 10px; padding: 16px; margin: 16px 0 10px; color: var(--accent-strong); font-size: 14px; }
+.secondary { width: auto; padding: 8px 12px; background: transparent; color: var(--accent-strong); border-color: var(--border); font-size: 12px; }
+.secondary:hover { background: var(--accent-wash); }
+button { border-radius: 10px; min-height: 42px; }
+button:disabled { opacity: .6; cursor: wait; }
+#saveStatus:empty { display: none; }
+.results { gap: 10px; }
+.metric { text-align: left; padding: 16px; background: var(--surface); }
+.metric:nth-child(4) { background: var(--accent-wash); border-color: var(--accent); }
+.value { font-family: inherit; font-size: 28px; letter-spacing: -.04em; }
+.metric-label { font-size: 10px; letter-spacing: .04em; }
+.status { grid-column: 1 / -1; }
+[hidden] { display: none !important; }
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; max-width: 680px; }
+  .performance { position: static; }
+  header.page { padding-top: 28px; }
+}
+@media (max-width: 480px) {
+  .layout { padding-left: 16px; padding-right: 16px; gap: 16px; }
+  .card { padding: 18px; }
+  .topnav-inner { padding: 12px 10px; gap: 2px; }
+  .topnav-link { font-size: 10px; padding: 6px 9px; }
+  .cabin-option { padding: 10px; gap: 9px; font-size: 13px; }
+}
